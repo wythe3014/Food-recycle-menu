@@ -76,6 +76,21 @@
             margin-top: 15px;
         }
 
+        /* 手动输入食材区域 */
+        .manual-input-area {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        #manualFoodInput {
+            flex: 1;
+            padding: 10px 14px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 15px;
+        }
+
         button {
             padding: 10px 20px;
             border: none;
@@ -247,9 +262,9 @@
     <div class="container">
         <h1>智能剩菜回收菜单生成系统</h1>
 
-        <!-- 1.摄像头食材识别模块 -->
+        <!-- 1.摄像头食材识别模块 + 新增手动输入食材 -->
         <div class="module-box">
-            <div class="module-title">📷 实时食材识别</div>
+            <div class="module-title">📷 食材录入（摄像头识别 / 手动输入）</div>
             <div class="camera-wrap">
                 <video id="video" autoplay muted playsinline></video>
                 <div>
@@ -260,6 +275,11 @@
                         <button class="btn-primary" id="identifyBtn">识别食材</button>
                     </div>
                 </div>
+            </div>
+            <!-- 新增手动输入食材栏 -->
+            <div class="manual-input-area">
+                <input type="text" id="manualFoodInput" placeholder="直接输入食材名称，例如：胡萝卜、土豆、青椒">
+                <button class="btn-primary" id="addManualFood">添加该食材</button>
             </div>
             <div class="identify-result" id="identifyResultBox"></div>
         </div>
@@ -302,7 +322,7 @@
         // 1.全局数据
         let video = document.getElementById('video');
         let stream = null;
-        let currentFoodList = []; // 当前识别的食材
+        let currentFoodList = []; // 当前识别/手动添加的食材
         let historyList = JSON.parse(localStorage.getItem('foodMenuHistory')) || [];
         let collectList = JSON.parse(localStorage.getItem('foodCollect')) || [];
 
@@ -389,16 +409,34 @@
             alert("食材识别完成！可手动编辑修改菜名");
         });
 
+        // 新增：手动输入食材添加功能
+        document.getElementById('addManualFood').addEventListener('click', ()=>{
+            const inputVal = document.getElementById('manualFoodInput').value.trim();
+            if(!inputVal){
+                alert("请输入食材名称！");
+                return;
+            }
+            if(currentFoodList.includes(inputVal)){
+                alert("该食材已存在，无需重复添加！");
+                return;
+            }
+            currentFoodList.push(inputVal);
+            document.getElementById('manualFoodInput').value = "";
+            renderIdentifyResult();
+            alert(`已添加食材：${inputVal}`);
+        })
+
         // 渲染识别结果，支持编辑
         function renderIdentifyResult(){
             const box = document.getElementById('identifyResultBox');
-            box.innerHTML = '<p style="margin-bottom:10px;font-weight:600">✅ 识别到的食材（可编辑修改）：</p>';
+            box.innerHTML = '<p style="margin-bottom:10px;font-weight:600">✅ 当前食材列表（可编辑/删除）：</p>';
             currentFoodList.forEach((item, index) => {
                 box.innerHTML += `
                     <div class="food-item-edit">
                         <span>食材${index+1}：</span>
                         <input type="text" value="${item}" id="foodInput${index}">
                         <button class="btn-default" onclick="editFoodName(${index})">确认修改</button>
+                        <button class="btn-default" style="background:#ff4444;color:white" onclick="delFood(${index})">删除</button>
                     </div>
                 `;
             });
@@ -415,10 +453,16 @@
             alert("修改成功！");
         }
 
+        // 删除食材
+        window.delFood = function(index){
+            currentFoodList.splice(index,1);
+            renderIdentifyResult();
+        }
+
         // 4.生成菜品列表
         document.getElementById('generateMenuBtn').addEventListener('click', () => {
             if(currentFoodList.length === 0){
-                alert("请先识别食材！");
+                alert("请先识别或手动输入食材！");
                 return;
             }
             const menuBox = document.getElementById('menuListBox');

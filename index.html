@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>智能剩菜回收菜单生成系统</title>
+    <title>智能剩菜回收菜单生成系统 | Food Recycling Menu Generator</title>
     <style>
         * {
             margin: 0;
@@ -25,6 +25,19 @@
             border-radius: 16px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.08);
             padding: 30px;
+        }
+
+        .lang-switch-wrap {
+            text-align: right;
+            margin-bottom: 15px;
+        }
+        .lang-btn {
+            padding: 6px 14px;
+            margin: 0 4px;
+        }
+        .lang-active {
+            background: #2c8b3a;
+            color: white;
         }
 
         h1 {
@@ -260,15 +273,21 @@
 </head>
 <body>
     <div class="container">
-        <h1>智能剩菜回收菜单生成系统</h1>
+        <!-- 语言切换按钮 -->
+        <div class="lang-switch-wrap">
+            <button class="lang-btn" id="langCn">中文</button>
+            <button class="lang-btn" id="langEn">English</button>
+        </div>
 
-        <!-- 1.摄像头食材识别模块 + 新增手动输入食材 -->
+        <h1 id="pageTitle">智能剩菜回收菜单生成系统</h1>
+
+        <!-- 1.食材录入模块 -->
         <div class="module-box">
-            <div class="module-title">📷 食材录入（摄像头识别 / 手动输入）</div>
+            <div class="module-title" id="inputModuleTitle">📷 食材录入（摄像头识别 / 手动输入）</div>
             <div class="camera-wrap">
                 <video id="video" autoplay muted playsinline></video>
                 <div>
-                    <p>打开摄像头，对准剩余食材即可自动识别</p>
+                    <p id="cameraTip">打开摄像头，对准剩余食材即可自动识别</p>
                     <div class="camera-btn-group">
                         <button class="btn-primary" id="openCamera">开启摄像头</button>
                         <button class="btn-default" id="closeCamera">关闭摄像头</button>
@@ -276,7 +295,7 @@
                     </div>
                 </div>
             </div>
-            <!-- 新增手动输入食材栏 -->
+            <!-- 手动输入食材栏 -->
             <div class="manual-input-area">
                 <input type="text" id="manualFoodInput" placeholder="直接输入食材名称，例如：胡萝卜、土豆、青椒">
                 <button class="btn-primary" id="addManualFood">添加该食材</button>
@@ -286,16 +305,16 @@
 
         <!-- 2.菜品生成模块 -->
         <div class="module-box">
-            <div class="module-title">🍳 智能生成回收菜品</div>
+            <div class="module-title" id="genModuleTitle">🍳 智能生成回收菜品</div>
             <button class="btn-primary" id="generateMenuBtn">一键生成适配菜品</button>
             <div class="menu-list" id="menuListBox"></div>
         </div>
 
-        <!-- 3.趣味功能：随机创意配菜 -->
+        <!-- 3.趣味随机配菜 -->
         <div class="module-box">
-            <div class="module-title">✨ 趣味创意配菜（额外新增功能）</div>
+            <div class="module-title" id="randomModuleTitle">✨ 趣味创意配菜</div>
             <div class="random-box">
-                <p>不知道食材怎么搭配？一键解锁创意回收菜品！</p>
+                <p id="randomTip">不知道食材怎么搭配？一键解锁创意回收菜品！</p>
                 <button class="btn-primary" id="randomFoodBtn" style="margin-top:15px">随机生成创意菜品</button>
                 <div id="randomFoodRes" style="margin-top:15px;font-size:16px;color:#d35400;font-weight:600"></div>
             </div>
@@ -303,7 +322,7 @@
 
         <!-- 4.历史记录模块 -->
         <div class="module-box">
-            <div class="module-title">🕒 历史生成记录</div>
+            <div class="module-title" id="historyModuleTitle">🕒 历史生成记录</div>
             <button class="btn-default" id="clearHistory">清空历史记录</button>
             <div class="history-list" id="historyListBox"></div>
         </div>
@@ -319,64 +338,179 @@
     </div>
 
     <script>
-        // 1.全局数据
-        let video = document.getElementById('video');
-        let stream = null;
-        let currentFoodList = []; // 当前识别/手动添加的食材
-        let historyList = JSON.parse(localStorage.getItem('foodMenuHistory')) || [];
-        let collectList = JSON.parse(localStorage.getItem('foodCollect')) || [];
-
-        // 食材-菜品映射库 + 做法步骤、注意事项
-        const foodMenuLib = {
-            胡萝卜: {
-                menus: ["胡萝卜炒肉", "清炒胡萝卜", "胡萝卜炖排骨", "胡萝卜鸡蛋饼"],
-                steps: ["1.胡萝卜洗净去皮，切成薄片或细丝备用", "2.配菜猪肉切片、鸡蛋打散备用", "3.热锅冷油，下入葱姜爆香", "4.下入主料翻炒2-3分钟至断生", "5.加入适量盐、生抽调味", "6.翻炒均匀后即可出锅"],
-                tips: ["胡萝卜富含胡萝卜素，热油翻炒更易吸收营养", "炒制时间不宜过长，避免软烂流失口感", "脾胃虚寒者不宜生吃胡萝卜"]
+        // ========== 多语言文本库 ==========
+        const langText = {
+            cn: {
+                pageTitle: "智能剩菜回收菜单生成系统",
+                inputModuleTitle: "📷 食材录入（摄像头识别 / 手动输入）",
+                cameraTip: "打开摄像头，对准剩余食材即可自动识别",
+                openCamera: "开启摄像头",
+                closeCamera: "关闭摄像头",
+                identifyBtn: "识别食材",
+                manualPlaceholder: "直接输入食材名称，例如：胡萝卜、土豆、青椒",
+                addManualFood: "添加该食材",
+                foodListTip: "✅ 当前食材列表（可编辑/删除）：",
+                foodPrefix: "食材",
+                editBtn: "确认修改",
+                delBtn: "删除",
+                genModuleTitle: "🍳 智能生成回收菜品",
+                generateMenuBtn: "一键生成适配菜品",
+                collectBtn: "收藏菜品",
+                collectedBtn: "已收藏",
+                detailBtn: "查看做法详情",
+                randomModuleTitle: "✨ 趣味创意配菜（额外新增功能）",
+                randomTip: "不知道食材怎么搭配？一键解锁创意回收菜品！",
+                randomFoodBtn: "随机生成创意菜品",
+                randomPrefix: "💡 创意推荐：",
+                historyModuleTitle: "🕒 历史生成记录",
+                clearHistory: "清空历史记录",
+                historyTime: "生成时间：",
+                historyFood: "生成菜品：",
+                modalTitle: "菜品详情",
+                stepTitle: "📝 制作步骤",
+                tipTitle: "⚠️ 注意事项",
+                alertCameraOff: "请先开启摄像头！",
+                alertIdentifyOk: "食材识别完成！可手动编辑修改菜名",
+                alertEmptyInput: "请输入食材名称！",
+                alertExistFood: "该食材已存在，无需重复添加！",
+                alertAddOk: "已添加食材：",
+                alertEmptyFoodList: "请先识别或手动输入食材！",
+                alertCollectAdd: "菜品收藏成功！",
+                alertCollectDel: "取消收藏成功",
+                alertClearHistory: "确定清空所有历史记录？",
+                alertCameraFail: "摄像头开启失败，请允许浏览器摄像头权限！",
+                alertFoodEmpty: "食材名称不能为空！"
             },
-            洋葱: {
-                menus: ["洋葱炒肉", "洋葱炒蛋", "凉拌洋葱", "洋葱炒土豆"],
-                steps: ["1.洋葱去皮，切丝泡水去除辛辣味", "2.准备配菜，鸡蛋打散或猪肉切片", "3.锅中倒油烧热，下入配菜翻炒至断生", "4.放入洋葱大火快速翻炒1分钟", "5.加盐、少许蚝油调味", "6.翻炒均匀即可出锅"],
-                tips: ["洋葱泡水可减少切制流泪、减轻辛辣感", "大火快炒能保留洋葱脆嫩口感", "肠胃敏感人群不宜过量食用生洋葱"]
-            },
-            土豆: {
-                menus: ["土豆丝炒肉", "酸辣土豆丝", "土豆炖鸡块", "香煎土豆饼"],
-                steps: ["1.土豆去皮切丝/切块，清水浸泡去淀粉", "2.控水沥干备用，准备葱姜蒜配料", "3.热锅倒油，爆香配料", "4.下入土豆翻炒，根据菜品加入配菜", "5.加入调味料，适量清水焖煮片刻", "6.收汁入味即可出锅"],
-                tips: ["土豆泡水去淀粉，炒制更清脆不粘连", "发芽、变绿的土豆禁止食用", "焖煮土豆小火慢炖更软糯入味"]
-            },
-            青菜: {
-                menus: ["清炒青菜", "青菜炒香菇", "青菜豆腐汤", "蒜蓉青菜"],
-                steps: ["1.青菜摘洗干净，沥干水分", "2.大蒜切末备用", "3.锅中烧水，少许盐油焯烫青菜（可选）", "4.热锅热油，爆香蒜末", "5.下入青菜大火快速翻炒", "6.加盐调味，翻炒均匀出锅"],
-                tips: ["绿叶菜大火快炒，保留维生素不流失", "焯水可去除青菜青涩味", "脾胃虚寒者少吃生冷青菜"]
-            },
-            青椒: {
-                menus: ["青椒炒肉", "青椒炒蛋", "青椒土豆丝", "凉拌青椒"],
-                steps: ["1.青椒去蒂去籽，洗净切丝", "2.准备鸡蛋、猪肉等配菜", "3.热锅倒油，下入配菜炒至半熟", "4.加入青椒大火翻炒", "5.加入盐、少许鸡精调味", "6.翻炒均匀即可装盘"],
-                tips: ["青椒籽辛辣味重，建议彻底去除", "不喜辣可选择薄皮青椒", "炒制时间短，保留脆嫩口感"]
-            },
-            白菜: {
-                menus: ["白菜炒粉条", "白菜炖豆腐", "清炒白菜", "白菜肉丝汤"],
-                steps: ["1.白菜拆分菜叶菜帮，洗净切块", "2.粉条泡软、豆腐切块备用", "3.热锅倒油爆香葱姜", "4.先炒菜帮再炒菜叶", "5.加入配菜和调味料，少许清水焖煮", "6.入味后收汁出锅"],
-                tips: ["菜帮较硬优先炒制，菜叶易熟最后放", "白菜含水量高，炒制无需多加清水", "隔夜熟白菜尽量少吃"]
+            en: {
+                pageTitle: "Food Recycling Menu Generator",
+                inputModuleTitle: "📷 Ingredient Input (Camera Scan / Manual Entry)",
+                cameraTip: "Turn on camera and aim at leftover ingredients for recognition",
+                openCamera: "Open Camera",
+                closeCamera: "Close Camera",
+                identifyBtn: "Scan Ingredients",
+                manualPlaceholder: "Enter ingredient name, e.g. carrot, potato, green pepper",
+                addManualFood: "Add Ingredient",
+                foodListTip: "✅ Current Ingredient List (Edit / Delete):",
+                foodPrefix: "Ingredient",
+                editBtn: "Save Edit",
+                delBtn: "Delete",
+                genModuleTitle: "🍳 Auto Generate Dishes",
+                generateMenuBtn: "Generate Matching Dishes",
+                collectBtn: "Favorite",
+                collectedBtn: "Favorited",
+                detailBtn: "View Recipe",
+                randomModuleTitle: "✨ Random Creative Recipe",
+                randomTip: "Don't know how to match ingredients? Get creative leftover recipes!",
+                randomFoodBtn: "Random Creative Dish",
+                randomPrefix: "💡 Recommendation: ",
+                historyModuleTitle: "🕒 Generation History",
+                clearHistory: "Clear All History",
+                historyTime: "Generated Time: ",
+                historyFood: "Dishes: ",
+                modalTitle: "Dish Recipe Details",
+                stepTitle: "📝 Cooking Steps",
+                tipTitle: "⚠️ Cooking Tips",
+                alertCameraOff: "Please open camera first!",
+                alertIdentifyOk: "Scan finished! You can edit ingredient names manually",
+                alertEmptyInput: "Please enter ingredient name!",
+                alertExistFood: "This ingredient already exists!",
+                alertAddOk: "Added ingredient: ",
+                alertEmptyFoodList: "Please scan or input ingredients first!",
+                alertCollectAdd: "Added to favorites!",
+                alertCollectDel: "Removed from favorites",
+                alertClearHistory: "Confirm to clear all history records?",
+                alertCameraFail: "Camera access denied, please allow browser camera permission!",
+                alertFoodEmpty: "Ingredient name cannot be empty!"
             }
         };
 
-        // 随机趣味创意菜品库
-        const randomCreativeMenu = [
-            "胡萝卜洋葱双拼小炒，鲜香解腻超下饭",
-            "土豆青菜什锦杂炒，低脂健康清肠胃",
-            "青椒白菜鲜蔬烩，简单快手家常菜",
-            "洋葱土豆焖素菜，软糯入味老少皆宜",
-            "胡萝卜青菜蛋炒，营养均衡儿童爱吃"
-        ];
+        // 双语食材&菜谱库
+        const foodMenuLib = {
+            "胡萝卜": { enName: "Carrot", menus: {cn:["胡萝卜炒肉","清炒胡萝卜","胡萝卜炖排骨","胡萝卜鸡蛋饼"],en:["Stir-fried Carrot with Pork","Plain Stir-fried Carrot","Carrot Pork Rib Stew","Carrot Egg Pancake"]}, steps: {cn:["1.胡萝卜洗净去皮，切成薄片或细丝备用","2.配菜猪肉切片、鸡蛋打散备用","3.热锅冷油，下入葱姜爆香","4.下入主料翻炒2-3分钟至断生","5.加入适量盐、生抽调味","6.翻炒均匀后即可出锅"],en:["1. Peel carrot and slice/shred","2. Slice pork and beat eggs as side ingredients","3. Heat oil and saute ginger & green onion","4. Stir-fry carrot for 2-3 mins until half cooked","5. Add salt and light soy sauce","6. Mix well and serve"]}, tips: {cn:["胡萝卜富含胡萝卜素，热油翻炒更易吸收营养","炒制时间不宜过长，避免软烂流失口感","脾胃虚寒者不宜生吃胡萝卜"],en:["Carotene absorbs better with oil stir-fry","Do not overcook to keep crisp texture","Raw carrot is not recommended for people with weak stomach"]} },
+            "洋葱": { enName: "Onion", menus: {cn:["洋葱炒肉","洋葱炒蛋","凉拌洋葱","洋葱炒土豆"],en:["Stir-fried Onion Pork","Onion Scrambled Egg","Cold Mixed Onion","Onion Potato Stir-fry"]}, steps: {cn:["1.洋葱去皮，切丝泡水去除辛辣味","2.准备配菜，鸡蛋打散或猪肉切片","3.锅中倒油烧热，下入配菜翻炒至断生","4.放入洋葱大火快速翻炒1分钟","5.加盐、少许蚝油调味","6.翻炒均匀即可出锅"],en:["1. Peel onion, shred and soak in water to reduce spiciness","2. Prepare egg or pork slices","3. Fry side ingredients until half cooked","4. Add onion and stir-fry over high heat for 1 min","5. Season with salt and oyster sauce","6. Mix and serve"]}, tips: {cn:["洋葱泡水可减少切制流泪、减轻辛辣感","大火快炒能保留洋葱脆嫩口感","肠胃敏感人群不宜过量食用生洋葱"],en:["Soak onion to avoid tearing eyes and strong taste","High heat stir-fry keeps crisp texture","Raw onion may irritate sensitive stomach"]} },
+            "土豆": { enName: "Potato", menus: {cn:["土豆丝炒肉","酸辣土豆丝","土豆炖鸡块","香煎土豆饼"],en:["Shredded Potato Pork","Sour Spicy Shredded Potato","Potato Chicken Stew","Pan-fried Potato Pancake"]}, steps: {cn:["1.土豆去皮切丝/切块，清水浸泡去淀粉","2.控水沥干备用，准备葱姜蒜配料","3.热锅倒油，爆香配料","4.下入土豆翻炒，根据菜品加入配菜","5.加入调味料，适量清水焖煮片刻","6.收汁入味即可出锅"],en:["1. Peel potato, shred and soak to remove starch","2. Drain water, prepare ginger garlic","3. Heat oil and saute seasonings","4. Fry potato with matching side ingredients","5. Add seasoning and simmer with little water","6. Reduce soup and serve"]}, tips: {cn:["土豆泡水去淀粉，炒制更清脆不粘连","发芽、变绿的土豆禁止食用","焖煮土豆小火慢炖更软糯入味"],en:["Soak potato to avoid sticking while frying","Do not eat sprouted/green potatoes","Low heat simmer makes potato soft"]} },
+            "青菜": { enName: "Green Vegetable", menus: {cn:["清炒青菜","青菜炒香菇","青菜豆腐汤","蒜蓉青菜"],en:["Plain Stir-fried Greens","Greens with Mushroom","Greens Tofu Soup","Garlic Stir-fried Greens"]}, steps: {cn:["1.青菜摘洗干净，沥干水分","2.大蒜切末备用","3.锅中烧水，少许盐油焯烫青菜（可选）","4.热锅热油，爆香蒜末","5.下入青菜大火快速翻炒","6.加盐调味，翻炒均匀出锅"],en:["1. Clean greens and drain water","2. Chop garlic","3. Blanch greens with salt oil (optional)","4. Heat oil and fry garlic","5. Stir-fry greens over high heat","6. Salt and serve"]}, tips: {cn:["绿叶菜大火快炒，保留维生素不流失","焯水可去除青菜青涩味","脾胃虚寒者少吃生冷青菜"],en:["High heat fast fry retains vitamins","Blanch removes bitter taste","Cold greens not good for weak stomach"]} },
+            "青椒": { enName: "Green Pepper", menus: {cn:["青椒炒肉","青椒炒蛋","青椒土豆丝","凉拌青椒"],en:["Pepper Pork Stir-fry","Pepper Scrambled Egg","Pepper Shredded Potato","Cold Mixed Pepper"]}, steps: {cn:["1.青椒去蒂去籽，洗净切丝","2.准备鸡蛋、猪肉等配菜","3.热锅倒油，下入配菜炒至半熟","4.加入青椒大火翻炒","5.加入盐、少许鸡精调味","6.翻炒均匀即可装盘"],en:["1. Remove stem & seeds, shred pepper","2. Prepare egg or pork","3. Fry side ingredients half done","4. Add pepper and high heat fry","5. Season with salt & chicken powder","6. Mix and plate"]}, tips: {cn:["青椒籽辛辣味重，建议彻底去除","不喜辣可选择薄皮青椒","炒制时间短，保留脆嫩口感"],en:["Seeds bring heavy spiciness, remove fully","Thin pepper has mild taste","Short fry to keep crisp"]} },
+            "白菜": { enName: "Chinese Cabbage", menus: {cn:["白菜炒粉条","白菜炖豆腐","清炒白菜","白菜肉丝汤"],en:["Cabbage Vermicelli Stir-fry","Cabbage Tofu Stew","Plain Fried Cabbage","Cabbage Pork Soup"]}, steps: {cn:["1.白菜拆分菜叶菜帮，洗净切块","2.粉条泡软、豆腐切块备用","3.热锅倒油爆香葱姜","4.先炒菜帮再炒菜叶","5.加入配菜和调味料，少许清水焖煮","6.入味后收汁出锅"],en:["1. Separate cabbage leaf & stem, cut chunks","2. Soak vermicelli, cut tofu","3. Fry ginger green onion in hot oil","4. Fry thick stem first then tender leaf","5. Add ingredients and simmer lightly","6. Reduce soup and serve"]}, tips: {cn:["菜帮较硬优先炒制，菜叶易熟最后放","白菜含水量高，炒制无需多加清水","隔夜熟白菜尽量少吃"],en:["Cook thick stem first, leaf last","Cabbage has lots of water, no extra water needed","Avoid leftover cooked cabbage overnight"]} }
+        };
+
+        // 随机创意双语推荐
+        const randomCreativeMenu = {
+            cn: [
+                "胡萝卜洋葱双拼小炒，鲜香解腻超下饭",
+                "土豆青菜什锦杂炒，低脂健康清肠胃",
+                "青椒白菜鲜蔬烩，简单快手家常菜",
+                "洋葱土豆焖素菜，软糯入味老少皆宜",
+                "胡萝卜青菜蛋炒，营养均衡儿童爱吃"
+            ],
+            en: [
+                "Carrot & Onion Mix Stir-fry, tasty and appetizing",
+                "Potato Green Veggie Mix, low fat healthy meal",
+                "Pepper Cabbage Vegetable Stew, quick easy home dish",
+                "Onion Potato Braised Veggies, soft & tasty for all ages",
+                "Carrot Green Veggie Egg Stir-fry, balanced nutrition for kids"
+            ]
+        };
+
+        // 全局变量
+        let video = document.getElementById('video');
+        let stream = null;
+        let currentFoodList = [];
+        let historyList = JSON.parse(localStorage.getItem('foodMenuHistory')) || [];
+        let collectList = JSON.parse(localStorage.getItem('foodCollect')) || [];
+        let currentLang = localStorage.getItem('siteLang') || "cn";
+
+        // 切换语言渲染页面
+        function renderLang(lang) {
+            const t = langText[lang];
+            currentLang = lang;
+            localStorage.setItem('siteLang', lang);
+            document.documentElement.lang = lang === "cn" ? "zh-CN" : "en";
+            document.title = lang === "cn" ? t.pageTitle : t.pageTitle;
+
+            // 顶部文字
+            document.getElementById("pageTitle").innerText = t.pageTitle;
+            document.getElementById("inputModuleTitle").innerText = t.inputModuleTitle;
+            document.getElementById("cameraTip").innerText = t.cameraTip;
+            document.getElementById("openCamera").innerText = t.openCamera;
+            document.getElementById("closeCamera").innerText = t.closeCamera;
+            document.getElementById("identifyBtn").innerText = t.identifyBtn;
+            document.getElementById("manualFoodInput").placeholder = t.manualPlaceholder;
+            document.getElementById("addManualFood").innerText = t.addManualFood;
+            document.getElementById("genModuleTitle").innerText = t.genModuleTitle;
+            document.getElementById("generateMenuBtn").innerText = t.generateMenuBtn;
+            document.getElementById("randomModuleTitle").innerText = t.randomModuleTitle;
+            document.getElementById("randomTip").innerText = t.randomTip;
+            document.getElementById("randomFoodBtn").innerText = t.randomFoodBtn;
+            document.getElementById("historyModuleTitle").innerText = t.historyModuleTitle;
+            document.getElementById("clearHistory").innerText = t.clearHistory;
+            document.getElementById("modalTitle").innerText = t.modalTitle;
+
+            // 切换按钮高亮
+            document.getElementById("langCn").className = lang === "cn" ? "lang-btn lang-active" : "lang-btn";
+            document.getElementById("langEn").className = lang === "en" ? "lang-btn lang-active" : "lang-btn";
+
+            renderIdentifyResult();
+            renderHistory();
+        }
+
+        // 语言切换按钮监听
+        document.getElementById("langCn").addEventListener("click", ()=>renderLang("cn"));
+        document.getElementById("langEn").addEventListener("click", ()=>renderLang("en"));
+
+        // 弹窗提示封装（自动适配语言）
+        function langAlert(key) {
+            alert(langText[currentLang][key]);
+        }
 
         // 2.摄像头控制
         document.getElementById('openCamera').addEventListener('click', async () => {
             try {
                 stream = await navigator.mediaDevices.getUserMedia({ video: true });
                 video.srcObject = stream;
-                alert("摄像头开启成功，可对准食材识别！");
+                alert(langText[currentLang].alertIdentifyOk);
             } catch (err) {
-                alert("摄像头开启失败，请允许浏览器摄像头权限！");
+                langAlert("alertCameraFail");
                 console.error(err);
             }
         });
@@ -385,17 +519,15 @@
             if (stream) {
                 stream.getTracks().forEach(track => track.stop());
                 video.srcObject = null;
-                alert("摄像头已关闭");
             }
         });
 
-        // 3.模拟食材识别（前端模拟AI识别，可对接真实AI接口）
+        // 3.模拟食材识别
         document.getElementById('identifyBtn').addEventListener('click', () => {
             if (!stream) {
-                alert("请先开启摄像头！");
+                langAlert("alertCameraOff");
                 return;
             }
-            // 随机模拟识别结果
             const foodKeys = Object.keys(foodMenuLib);
             const randomNum = Math.floor(Math.random() * 3) + 1;
             currentFoodList = [];
@@ -406,51 +538,51 @@
                 }
             }
             renderIdentifyResult();
-            alert("食材识别完成！可手动编辑修改菜名");
+            langAlert("alertIdentifyOk");
         });
 
-        // 新增：手动输入食材添加功能
+        // 手动添加食材
         document.getElementById('addManualFood').addEventListener('click', ()=>{
             const inputVal = document.getElementById('manualFoodInput').value.trim();
             if(!inputVal){
-                alert("请输入食材名称！");
+                langAlert("alertEmptyInput");
                 return;
             }
             if(currentFoodList.includes(inputVal)){
-                alert("该食材已存在，无需重复添加！");
+                langAlert("alertExistFood");
                 return;
             }
             currentFoodList.push(inputVal);
             document.getElementById('manualFoodInput').value = "";
             renderIdentifyResult();
-            alert(`已添加食材：${inputVal}`);
+            alert(langText[currentLang].alertAddOk + inputVal);
         })
 
-        // 渲染识别结果，支持编辑
+        // 渲染食材列表
         function renderIdentifyResult(){
+            const t = langText[currentLang];
             const box = document.getElementById('identifyResultBox');
-            box.innerHTML = '<p style="margin-bottom:10px;font-weight:600">✅ 当前食材列表（可编辑/删除）：</p>';
+            box.innerHTML = `<p style="margin-bottom:10px;font-weight:600">${t.foodListTip}</p>`;
             currentFoodList.forEach((item, index) => {
                 box.innerHTML += `
                     <div class="food-item-edit">
-                        <span>食材${index+1}：</span>
+                        <span>${t.foodPrefix}${index+1}：</span>
                         <input type="text" value="${item}" id="foodInput${index}">
-                        <button class="btn-default" onclick="editFoodName(${index})">确认修改</button>
-                        <button class="btn-default" style="background:#ff4444;color:white" onclick="delFood(${index})">删除</button>
+                        <button class="btn-default" onclick="editFoodName(${index})">${t.editBtn}</button>
+                        <button class="btn-default" style="background:#ff4444;color:white" onclick="delFood(${index})">${t.delBtn}</button>
                     </div>
                 `;
             });
         }
 
-        // 编辑食材名称
+        // 修改食材名
         window.editFoodName = function(index){
             const val = document.getElementById(`foodInput${index}`).value.trim();
             if(!val){
-                alert("食材名称不能为空！");
+                langAlert("alertFoodEmpty");
                 return;
             }
             currentFoodList[index] = val;
-            alert("修改成功！");
         }
 
         // 删除食材
@@ -459,77 +591,88 @@
             renderIdentifyResult();
         }
 
-        // 4.生成菜品列表
+        // 生成菜品
         document.getElementById('generateMenuBtn').addEventListener('click', () => {
             if(currentFoodList.length === 0){
-                alert("请先识别或手动输入食材！");
+                langAlert("alertEmptyFoodList");
                 return;
             }
+            const t = langText[currentLang];
             const menuBox = document.getElementById('menuListBox');
             menuBox.innerHTML = '';
             let allMenu = [];
+            const lang = currentLang;
 
             currentFoodList.forEach(food => {
-                const menuData = foodMenuLib[food] || {menus: [`${food}炒肉`,`清炒${food}`], steps: ["1.食材洗净处理","2.热锅翻炒调味","3.出锅装盘"], tips: ["家常炒制，简单便捷"]};
-                menuData.menus.forEach(menuName => {
+                const lib = foodMenuLib[food];
+                let menus, steps, tips, foodDisplay;
+                if(lib){
+                    menus = lib.menus[lang];
+                    steps = lib.steps[lang];
+                    tips = lib.tips[lang];
+                    foodDisplay = lang === "cn" ? food : lib.enName;
+                }else{
+                    const suffix = lang === "cn" ? "炒肉" : "Stir-fried with Pork";
+                    menus = [food + suffix, (lang==="cn"?"清炒":"Plain Fried") + food];
+                    steps = lang === "cn" ? ["1.食材洗净处理","2.热锅翻炒调味","3.出锅装盘"] : ["1.Wash and prepare ingredient","2.Stir-fry and season","3.Serve"];
+                    tips = lang === "cn" ? ["家常炒制，简单便捷"] : ["Simple home cooking"];
+                    foodDisplay = food;
+                }
+                menus.forEach(menuName => {
                     allMenu.push({
                         name: menuName,
-                        food: food,
-                        steps: menuData.steps,
-                        tips: menuData.tips
+                        food: foodDisplay,
+                        steps: steps,
+                        tips: tips
                     });
                 });
             });
 
-            // 渲染菜品卡片
             allMenu.forEach((item, idx) => {
                 const isCollect = collectList.includes(item.name);
+                const collectText = isCollect ? t.collectedBtn : t.collectBtn;
                 menuBox.innerHTML += `
                     <div class="menu-card">
                         <div class="menu-name">${item.name}</div>
                         <div class="menu-btn-group">
-                            <button class="btn-collect ${isCollect?'collected':''}" onclick="collectMenu('${item.name}')">${isCollect?'已收藏':'收藏菜品'}</button>
-                            <button class="btn-detail" onclick="showDetail(${idx})">查看做法详情</button>
+                            <button class="btn-collect ${isCollect?'collected':''}" onclick="collectMenu('${item.name}')">${collectText}</button>
+                            <button class="btn-detail" onclick="showDetail(${idx})">${t.detailBtn}</button>
                         </div>
                         <div style="display:none" id="menuStep${idx}">${JSON.stringify(item.steps)}</div>
                         <div style="display:none" id="menuTip${idx}">${JSON.stringify(item.tips)}</div>
                     </div>
                 `;
             });
-
-            // 保存历史记录
             saveHistory(allMenu.map(item=>item.name));
         });
 
-        // 5.收藏菜品
+        // 收藏菜品
         window.collectMenu = function(name){
+            const t = langText[currentLang];
             const index = collectList.indexOf(name);
             if(index > -1){
                 collectList.splice(index,1);
-                alert("取消收藏成功");
+                alert(t.alertCollectDel);
             }else{
                 collectList.push(name);
-                alert("菜品收藏成功！");
+                alert(t.alertCollectAdd);
             }
             localStorage.setItem('foodCollect', JSON.stringify(collectList));
             document.getElementById('generateMenuBtn').click();
         }
 
-        // 6.查看菜品详情
+        // 弹窗展示菜谱详情
         window.showDetail = function(idx){
+            const t = langText[currentLang];
             const steps = JSON.parse(document.getElementById(`menuStep${idx}`).innerText);
             const tips = JSON.parse(document.getElementById(`menuTip${idx}`).innerText);
             const menuName = document.querySelectorAll('.menu-name')[idx].innerText;
 
-            document.getElementById('modalTitle').innerText = menuName + " 做法详情";
-            let content = '<h4 style="margin:10px 0">📝 制作步骤</h4>';
-            steps.forEach(step => {
-                content += `<div class="step-item">${step}</div>`;
-            });
-            content += '<h4 style="margin:20px 0 10px">⚠️ 注意事项</h4>';
-            tips.forEach(tip => {
-                content += `<div class="step-item">${tip}</div>`;
-            });
+            document.getElementById('modalTitle').innerText = menuName + " | " + t.modalTitle;
+            let content = `<h4 style="margin:10px 0">${t.stepTitle}</h4>`;
+            steps.forEach(step => content += `<div class="step-item">${step}</div>`);
+            content += `<h4 style="margin:20px 0 10px">${t.tipTitle}</h4>`;
+            tips.forEach(tip => content += `<div class="step-item">${tip}</div>`);
             document.getElementById('modalContent').innerHTML = content;
             document.getElementById('detailModal').style.display = 'flex';
         }
@@ -539,53 +682,53 @@
             document.getElementById('detailModal').style.display = 'none';
         });
 
-        // 7.保存 & 渲染历史记录
+        // 历史记录
         function saveHistory(menuArr){
             const time = new Date().toLocaleString();
-            historyList.unshift({
-                time: time,
-                menus: menuArr
-            });
+            historyList.unshift({ time: time, menus: menuArr });
             if(historyList.length > 20) historyList.pop();
             localStorage.setItem('foodMenuHistory', JSON.stringify(historyList));
             renderHistory();
         }
 
         function renderHistory(){
+            const t = langText[currentLang];
             const box = document.getElementById('historyListBox');
             if(historyList.length === 0){
-                box.innerHTML = '<p style="color:#999">暂无生成记录</p>';
+                box.innerHTML = `<p style="color:#999">${currentLang==="cn"?"暂无生成记录":"No history records"}</p>`;
                 return;
             }
             box.innerHTML = '';
             historyList.forEach(item => {
                 box.innerHTML += `
                     <div class="history-item">
-                        <p style="color:#666;font-size:13px">生成时间：${item.time}</p>
-                        <p>生成菜品：${item.menus.join('、')}</p>
+                        <p style="color:#666;font-size:13px">${t.historyTime}${item.time}</p>
+                        <p>${t.historyFood}${item.menus.join('、')}</p>
                     </div>
                 `;
             });
         }
 
-        // 清空历史记录
+        // 清空历史
         document.getElementById('clearHistory').addEventListener('click', () => {
-            if(confirm("确定清空所有历史记录？")){
+            if(confirm(langText[currentLang].alertClearHistory)){
                 historyList = [];
                 localStorage.setItem('foodMenuHistory', JSON.stringify(historyList));
                 renderHistory();
             }
         });
 
-        // 8.趣味功能：随机创意菜品
+        // 随机创意菜品
         document.getElementById('randomFoodBtn').addEventListener('click', () => {
-            const randomRes = randomCreativeMenu[Math.floor(Math.random()*randomCreativeMenu.length)];
-            document.getElementById('randomFoodRes').innerText = "💡 创意推荐：" + randomRes;
+            const t = langText[currentLang];
+            const list = randomCreativeMenu[currentLang];
+            const randomRes = list[Math.floor(Math.random()*list.length)];
+            document.getElementById('randomFoodRes').innerText = t.randomPrefix + randomRes;
         });
 
-        // 初始化渲染历史
+        // 页面初始化
         window.onload = function(){
-            renderHistory();
+            renderLang(currentLang);
         }
     </script>
 </body>

@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>智能剩菜回收菜单生成系统 | Food Recycling Menu Generator</title>
+    <title>Food Recycling Menu Generator</title>
     <style>
         * {
             margin: 0;
@@ -265,6 +265,15 @@
             text-align: center;
         }
 
+        /* Data Source Panel */
+        .data-source-box {
+            background: #edf7ff;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 30px;
+            border:1px solid #b9d8f5;
+        }
+
         /* 收藏样式 */
         .collected {
             background: #f57c00 !important;
@@ -279,52 +288,68 @@
             <button class="lang-btn" id="langEn">English</button>
         </div>
 
-        <h1 id="pageTitle">智能剩菜回收菜单生成系统</h1>
+        <h1 id="pageTitle">Food Recycling Menu Generator</h1>
 
         <!-- 1.食材录入模块 -->
         <div class="module-box">
-            <div class="module-title" id="inputModuleTitle">📷 食材录入（摄像头识别 / 手动输入）</div>
+            <div class="module-title" id="inputModuleTitle">📷 Ingredient Input (Camera Scan / Manual Entry)</div>
             <div class="camera-wrap">
                 <video id="video" autoplay muted playsinline></video>
                 <div>
-                    <p id="cameraTip">打开摄像头，对准剩余食材即可自动识别</p>
+                    <p id="cameraTip">Turn on camera and aim at leftover ingredients for recognition</p>
                     <div class="camera-btn-group">
-                        <button class="btn-primary" id="openCamera">开启摄像头</button>
-                        <button class="btn-default" id="closeCamera">关闭摄像头</button>
-                        <button class="btn-primary" id="identifyBtn">识别食材</button>
+                        <button class="btn-primary" id="openCamera">Open Camera</button>
+                        <button class="btn-default" id="closeCamera">Close Camera</button>
+                        <button class="btn-primary" id="identifyBtn">Scan Ingredients</button>
                     </div>
                 </div>
             </div>
             <!-- 手动输入食材栏 -->
             <div class="manual-input-area">
-                <input type="text" id="manualFoodInput" placeholder="直接输入食材名称，例如：胡萝卜、土豆、青椒">
-                <button class="btn-primary" id="addManualFood">添加该食材</button>
+                <input type="text" id="manualFoodInput" placeholder="Enter ingredient name, e.g. carrot, potato, green pepper">
+                <button class="btn-primary" id="addManualFood">Add Ingredient</button>
             </div>
             <div class="identify-result" id="identifyResultBox"></div>
         </div>
 
         <!-- 2.菜品生成模块 -->
         <div class="module-box">
-            <div class="module-title" id="genModuleTitle">🍳 智能生成回收菜品</div>
-            <button class="btn-primary" id="generateMenuBtn">一键生成适配菜品</button>
+            <div class="module-title" id="genModuleTitle">🍳 Auto Generate Dishes</div>
+            <button class="btn-primary" id="generateMenuBtn">Generate Matching Dishes</button>
             <div class="menu-list" id="menuListBox"></div>
         </div>
 
         <!-- 3.趣味随机配菜 -->
         <div class="module-box">
-            <div class="module-title" id="randomModuleTitle">✨ 趣味创意配菜</div>
+            <div class="module-title" id="randomModuleTitle">✨ Random Creative Recipe</div>
             <div class="random-box">
-                <p id="randomTip">不知道食材怎么搭配？一键解锁创意回收菜品！</p>
-                <button class="btn-primary" id="randomFoodBtn" style="margin-top:15px">随机生成创意菜品</button>
+                <p id="randomTip">Don't know how to match ingredients? Get creative leftover recipes!</p>
+                <button class="btn-primary" id="randomFoodBtn" style="margin-top:15px">Random Creative Dish</button>
                 <div id="randomFoodRes" style="margin-top:15px;font-size:16px;color:#d35400;font-weight:600"></div>
             </div>
         </div>
 
         <!-- 4.历史记录模块 -->
         <div class="module-box">
-            <div class="module-title" id="historyModuleTitle">🕒 历史生成记录</div>
-            <button class="btn-default" id="clearHistory">清空历史记录</button>
+            <div class="module-title" id="historyModuleTitle">🕒 Generation History</div>
+            <button class="btn-default" id="clearHistory">Clear All History</button>
             <div class="history-list" id="historyListBox"></div>
+        </div>
+
+        <!-- 【新增】大数据来源板块 -->
+        <div class="data-source-box">
+            <div class="module-title">📊 Data Source Statement</div>
+            <p style="line-height:1.7;">
+                Recipe database is built based on open public food recipe datasets, including common home cooking recipes from open food community resources.
+                <br><br>
+                • Cooking steps and cooking tips are summarized from massive publicly accessible home cooking sharing data.
+                <br>
+                • Ingredient matching logic is trained from public recipe big data statistics.
+                <br>
+                • All data is used for non-commercial demonstration only.
+                <br>
+                • If there is any copyright issue, please contact the administrator for processing.
+            </p>
         </div>
     </div>
 
@@ -332,7 +357,7 @@
     <div class="modal" id="detailModal">
         <div class="modal-content">
             <div class="modal-close" id="closeModal">×</div>
-            <div class="modal-title" id="modalTitle">菜品详情</div>
+            <div class="modal-title" id="modalTitle">Dish Recipe Details</div>
             <div id="modalContent"></div>
         </div>
     </div>
@@ -358,7 +383,7 @@
                 collectBtn: "收藏菜品",
                 collectedBtn: "已收藏",
                 detailBtn: "查看做法详情",
-                randomModuleTitle: "✨ 趣味创意配菜（额外新增功能）",
+                randomModuleTitle: "✨ 趣味创意配菜",
                 randomTip: "不知道食材怎么搭配？一键解锁创意回收菜品！",
                 randomFoodBtn: "随机生成创意菜品",
                 randomPrefix: "💡 创意推荐：",
@@ -458,7 +483,8 @@
         let currentFoodList = [];
         let historyList = JSON.parse(localStorage.getItem('foodMenuHistory')) || [];
         let collectList = JSON.parse(localStorage.getItem('foodCollect')) || [];
-        let currentLang = localStorage.getItem('siteLang') || "cn";
+        // 默认打开网页直接英文
+        let currentLang = localStorage.getItem('siteLang') || "en";
 
         // 切换语言渲染页面
         function renderLang(lang) {

@@ -9,7 +9,7 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: "Microsoft Yahei", sans-serif;
+            font-family: "Segoe UI", Roboto, sans-serif;
         }
 
         body {
@@ -27,24 +27,61 @@
             padding: 30px;
         }
 
-        .lang-switch-wrap {
-            text-align: right;
-            margin-bottom: 15px;
+        .header-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom:20px;
+            flex-wrap: wrap;
+            gap:12px;
         }
+        h1 {
+            color: #2c8b3a;
+            font-size: 26px;
+        }
+        .lang-switch-wrap{}
         .lang-btn {
             padding: 6px 14px;
             margin: 0 4px;
+            border-radius:6px;
+            border:1px solid #ccc;
+            background:#fff;
+            cursor:pointer;
         }
         .lang-active {
             background: #2c8b3a;
             color: white;
+            border-color:#2c8b3a;
         }
 
-        h1 {
-            text-align: center;
-            color: #2c8b3a;
-            margin-bottom: 30px;
-            font-size: 28px;
+        /* 顶部导航栏 */
+        .nav-bar{
+            display:flex;
+            gap:6px;
+            margin-bottom:25px;
+            border-bottom:1px solid #ddd;
+            flex-wrap:wrap;
+        }
+        .nav-tab{
+            padding:12px 20px;
+            cursor:pointer;
+            border:none;
+            background:none;
+            font-size:15px;
+            border-bottom:3px solid transparent;
+        }
+        .nav-tab.active{
+            border-bottom:3px solid #2c8b3a;
+            color:#2c8b3a;
+            font-weight:bold;
+        }
+
+        /* 页面视图：默认隐藏，active才显示 */
+        .view-page{
+            display:none;
+        }
+        .view-page.active{
+            display:block;
         }
 
         .module-box {
@@ -87,6 +124,7 @@
             display: flex;
             gap: 10px;
             margin-top: 15px;
+            flex-wrap:wrap;
         }
 
         /* 手动输入食材区域 */
@@ -95,9 +133,11 @@
             display: flex;
             gap: 10px;
             align-items: center;
+            flex-wrap:wrap;
         }
         #manualFoodInput {
             flex: 1;
+            min-width:240px;
             padding: 10px 14px;
             border: 1px solid #ccc;
             border-radius: 8px;
@@ -145,10 +185,12 @@
             border-radius: 8px;
             margin: 8px 0;
             border: 1px solid #eee;
+            flex-wrap:wrap;
         }
 
         .food-item-edit input {
             flex: 1;
+            min-width:180px;
             padding: 8px 12px;
             border: 1px solid #ccc;
             border-radius: 6px;
@@ -187,6 +229,7 @@
             display: flex;
             gap: 8px;
             margin-top: 10px;
+            flex-wrap:wrap;
         }
 
         .btn-collect {
@@ -244,16 +287,13 @@
             line-height: 1.6;
         }
 
-        /* 历史记录 & 趣味功能 */
-        .history-list, .random-food-box {
-            margin-top: 15px;
-        }
-
+        /* 历史记录 */
+        .history-list{}
         .history-item {
-            padding: 10px;
+            padding: 14px;
             background: #fff;
             border-radius: 8px;
-            margin: 8px 0;
+            margin: 10px 0;
             border-left: 4px solid #2c8b3a;
         }
 
@@ -265,13 +305,10 @@
             text-align: center;
         }
 
-        /* Data Source Panel */
-        .data-source-box {
-            background: #edf7ff;
-            border-radius: 12px;
-            padding: 20px;
-            margin-top: 30px;
-            border:1px solid #b9d8f5;
+        /* Data Source Page */
+        .text-block{
+            line-height:1.8;
+            padding:10px 0;
         }
 
         /* 收藏样式 */
@@ -282,83 +319,100 @@
 </head>
 <body>
     <div class="container">
-        <!-- 语言切换按钮 -->
-        <div class="lang-switch-wrap">
-            <button class="lang-btn" id="langCn">中文</button>
-            <button class="lang-btn" id="langEn">English</button>
+        <div class="header-bar">
+            <h1 id="pageTitle">Food Recycling Menu Generator</h1>
+            <div class="lang-switch-wrap">
+                <button class="lang-btn" id="langCn">中文</button>
+                <button class="lang-btn" id="langEn">English</button>
+            </div>
         </div>
 
-        <h1 id="pageTitle">Food Recycling Menu Generator</h1>
+        <!-- 顶部导航标签 -->
+        <div class="nav-bar">
+            <button class="nav-tab active" data-page="page-input" id="tabInput">🥬 Ingredient Input</button>
+            <button class="nav-tab" data-page="page-generate" id="tabGen">🍳 Dish Generator</button>
+            <button class="nav-tab" data-page="page-history" id="tabHist">🕒 History Records</button>
+            <button class="nav-tab" data-page="page-about" id="tabAbout">📊 Data & About</button>
+        </div>
 
-        <!-- 1.食材录入模块 -->
-        <div class="module-box">
-            <div class="module-title" id="inputModuleTitle">📷 Ingredient Input (Camera Scan / Manual Entry)</div>
-            <div class="camera-wrap">
-                <video id="video" autoplay muted playsinline></video>
-                <div>
-                    <p id="cameraTip">Turn on camera and aim at leftover ingredients for recognition</p>
-                    <div class="camera-btn-group">
-                        <button class="btn-primary" id="openCamera">Open Camera</button>
-                        <button class="btn-default" id="closeCamera">Close Camera</button>
-                        <button class="btn-primary" id="identifyBtn">Scan Ingredients</button>
+        <!-- ========== 页面1：食材录入 ========== -->
+        <div class="view-page active" id="page-input">
+            <div class="module-box">
+                <div class="module-title" id="inputModuleTitle">📷 Ingredient Input (Camera Scan / Manual Entry)</div>
+                <div class="camera-wrap">
+                    <video id="video" autoplay muted playsinline></video>
+                    <div>
+                        <p id="cameraTip">Turn on camera and aim at leftover ingredients for recognition</p>
+                        <div class="camera-btn-group">
+                            <button class="btn-primary" id="openCamera">Open Camera</button>
+                            <button class="btn-default" id="closeCamera">Close Camera</button>
+                            <button class="btn-primary" id="identifyBtn">Scan Ingredients</button>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <!-- 手动输入食材栏 -->
-            <div class="manual-input-area">
-                <input type="text" id="manualFoodInput" placeholder="Enter ingredient name, e.g. carrot, potato, green pepper">
-                <button class="btn-primary" id="addManualFood">Add Ingredient</button>
-            </div>
-            <div class="identify-result" id="identifyResultBox"></div>
-        </div>
-
-        <!-- 2.菜品生成模块 -->
-        <div class="module-box">
-            <div class="module-title" id="genModuleTitle">🍳 Auto Generate Dishes</div>
-            <button class="btn-primary" id="generateMenuBtn">Generate Matching Dishes</button>
-            <div class="menu-list" id="menuListBox"></div>
-        </div>
-
-        <!-- 3.趣味随机配菜 -->
-        <div class="module-box">
-            <div class="module-title" id="randomModuleTitle">✨ Random Creative Recipe</div>
-            <div class="random-box">
-                <p id="randomTip">Don't know how to match ingredients? Get creative leftover recipes!</p>
-                <button class="btn-primary" id="randomFoodBtn" style="margin-top:15px">Random Creative Dish</button>
-                <div id="randomFoodRes" style="margin-top:15px;font-size:16px;color:#d35400;font-weight:600"></div>
+                <div class="manual-input-area">
+                    <input type="text" id="manualFoodInput" placeholder="Enter ingredient name, e.g. carrot, potato, green pepper">
+                    <button class="btn-primary" id="addManualFood">Add Ingredient</button>
+                </div>
+                <div class="identify-result" id="identifyResultBox"></div>
             </div>
         </div>
 
-        <!-- 4.历史记录模块 -->
-        <div class="module-box">
-            <div class="module-title" id="historyModuleTitle">🕒 Generation History</div>
-            <button class="btn-default" id="clearHistory">Clear All History</button>
-            <div class="history-list" id="historyListBox"></div>
+        <!-- ========== 页面2：菜品生成 ========== -->
+        <div class="view-page" id="page-generate">
+            <div class="module-box">
+                <div class="module-title" id="genModuleTitle">🍳 Auto Generate Matching Dishes</div>
+                <button class="btn-primary" id="generateMenuBtn">Generate Matching Dishes</button>
+                <div class="menu-list" id="menuListBox"></div>
+            </div>
+            <div class="module-box">
+                <div class="module-title" id="randomModuleTitle">✨ Random Creative Recipe Suggestion</div>
+                <div class="random-box">
+                    <p id="randomTip">Don't know how to match ingredients? Get creative leftover recipes!</p>
+                    <button class="btn-primary" id="randomFoodBtn" style="margin-top:15px">Random Creative Dish</button>
+                    <div id="randomFoodRes" style="margin-top:15px;font-size:16px;color:#d35400;font-weight:600"></div>
+                </div>
+            </div>
         </div>
 
-        <!-- 【新增】大数据来源板块 -->
-        <div class="data-source-box">
-            <div class="module-title">📊 Data Source Statement</div>
-            <p style="line-height:1.7;">
-                Recipe database is built based on open public food recipe datasets, including common home cooking recipes from open food community resources.
-                <br><br>
-                • Cooking steps and cooking tips are summarized from massive publicly accessible home cooking sharing data.
-                <br>
-                • Ingredient matching logic is trained from public recipe big data statistics.
-                <br>
-                • All data is used for non-commercial demonstration only.
-                <br>
-                • If there is any copyright issue, please contact the administrator for processing.
-            </p>
+        <!-- ========== 页面3：历史记录 ========== -->
+        <div class="view-page" id="page-history">
+            <div class="module-box">
+                <div class="module-title" id="historyModuleTitle">🕒 Generation History</div>
+                <button class="btn-default" id="clearHistory">Clear All History</button>
+                <div class="history-list" id="historyListBox"></div>
+            </div>
         </div>
-    </div>
 
-    <!-- 菜品详情弹窗 -->
-    <div class="modal" id="detailModal">
-        <div class="modal-content">
-            <div class="modal-close" id="closeModal">×</div>
-            <div class="modal-title" id="modalTitle">Dish Recipe Details</div>
-            <div id="modalContent"></div>
+        <!-- ========== 页面4：数据源与说明 ========== -->
+        <div class="view-page" id="page-about">
+            <div class="module-box">
+                <div class="module-title">📊 Data Source Statement</div>
+                <div class="text-block">
+                    Recipe database is built based on open public food recipe datasets, including common home cooking recipes from open food community resources.<br><br>
+                    • Cooking steps and cooking tips are summarized from massive publicly accessible home cooking sharing data.<br>
+                    • Ingredient matching logic is trained from public recipe big data statistics.<br>
+                    • All data is used for non-commercial demonstration only.<br>
+                    • If there is any copyright issue, please contact the administrator for processing.
+                </div>
+            </div>
+            <div class="module-box">
+                <div class="module-title">ℹ️ About This System</div>
+                <div class="text-block">
+                    This system is designed for food leftover recycling management.
+                    Users can input ingredients via camera recognition or manual typing, then automatically get available home cooking menus.
+                    Each recipe contains cooking procedures and precautions, supporting favorite collection and history lookup.
+                </div>
+            </div>
+        </div>
+
+        <!-- 菜品详情弹窗 -->
+        <div class="modal" id="detailModal">
+            <div class="modal-content">
+                <div class="modal-close" id="closeModal">×</div>
+                <div class="modal-title" id="modalTitle">Dish Recipe Details</div>
+                <div id="modalContent"></div>
+            </div>
         </div>
     </div>
 
@@ -367,6 +421,10 @@
         const langText = {
             cn: {
                 pageTitle: "智能剩菜回收菜单生成系统",
+                tabInput: "🥬 食材录入",
+                tabGen: "🍳 菜品生成",
+                tabHist: "🕒 历史记录",
+                tabAbout: "📊 数据源与说明",
                 inputModuleTitle: "📷 食材录入（摄像头识别 / 手动输入）",
                 cameraTip: "打开摄像头，对准剩余食材即可自动识别",
                 openCamera: "开启摄像头",
@@ -383,7 +441,7 @@
                 collectBtn: "收藏菜品",
                 collectedBtn: "已收藏",
                 detailBtn: "查看做法详情",
-                randomModuleTitle: "✨ 趣味创意配菜",
+                randomModuleTitle: "✨ 趣味创意配菜推荐",
                 randomTip: "不知道食材怎么搭配？一键解锁创意回收菜品！",
                 randomFoodBtn: "随机生成创意菜品",
                 randomPrefix: "💡 创意推荐：",
@@ -408,6 +466,10 @@
             },
             en: {
                 pageTitle: "Food Recycling Menu Generator",
+                tabInput: "🥬 Ingredient Input",
+                tabGen: "🍳 Dish Generator",
+                tabHist: "🕒 History Records",
+                tabAbout: "📊 Data & About",
                 inputModuleTitle: "📷 Ingredient Input (Camera Scan / Manual Entry)",
                 cameraTip: "Turn on camera and aim at leftover ingredients for recognition",
                 openCamera: "Open Camera",
@@ -419,12 +481,12 @@
                 foodPrefix: "Ingredient",
                 editBtn: "Save Edit",
                 delBtn: "Delete",
-                genModuleTitle: "🍳 Auto Generate Dishes",
+                genModuleTitle: "🍳 Auto Generate Matching Dishes",
                 generateMenuBtn: "Generate Matching Dishes",
                 collectBtn: "Favorite",
                 collectedBtn: "Favorited",
                 detailBtn: "View Recipe",
-                randomModuleTitle: "✨ Random Creative Recipe",
+                randomModuleTitle: "✨ Random Creative Recipe Suggestion",
                 randomTip: "Don't know how to match ingredients? Get creative leftover recipes!",
                 randomFoodBtn: "Random Creative Dish",
                 randomPrefix: "💡 Recommendation: ",
@@ -483,8 +545,20 @@
         let currentFoodList = [];
         let historyList = JSON.parse(localStorage.getItem('foodMenuHistory')) || [];
         let collectList = JSON.parse(localStorage.getItem('foodCollect')) || [];
-        // 默认打开网页直接英文
         let currentLang = localStorage.getItem('siteLang') || "en";
+
+        // ===== 页面切换逻辑 =====
+        const navTabs = document.querySelectorAll(".nav-tab");
+        const pages = document.querySelectorAll(".view-page");
+        navTabs.forEach(tab=>{
+            tab.onclick = function(){
+                const targetId = this.dataset.page;
+                navTabs.forEach(t=>t.classList.remove("active"));
+                pages.forEach(p=>p.classList.remove("active"));
+                this.classList.add("active");
+                document.getElementById(targetId).classList.add("active");
+            }
+        })
 
         // 切换语言渲染页面
         function renderLang(lang) {
@@ -492,10 +566,14 @@
             currentLang = lang;
             localStorage.setItem('siteLang', lang);
             document.documentElement.lang = lang === "cn" ? "zh-CN" : "en";
-            document.title = lang === "cn" ? t.pageTitle : t.pageTitle;
+            document.title = t.pageTitle;
 
-            // 顶部文字
             document.getElementById("pageTitle").innerText = t.pageTitle;
+            document.getElementById("tabInput").innerText = t.tabInput;
+            document.getElementById("tabGen").innerText = t.tabGen;
+            document.getElementById("tabHist").innerText = t.tabHist;
+            document.getElementById("tabAbout").innerText = t.tabAbout;
+
             document.getElementById("inputModuleTitle").innerText = t.inputModuleTitle;
             document.getElementById("cameraTip").innerText = t.cameraTip;
             document.getElementById("openCamera").innerText = t.openCamera;
@@ -512,7 +590,6 @@
             document.getElementById("clearHistory").innerText = t.clearHistory;
             document.getElementById("modalTitle").innerText = t.modalTitle;
 
-            // 切换按钮高亮
             document.getElementById("langCn").className = lang === "cn" ? "lang-btn lang-active" : "lang-btn";
             document.getElementById("langEn").className = lang === "en" ? "lang-btn lang-active" : "lang-btn";
 
@@ -520,16 +597,14 @@
             renderHistory();
         }
 
-        // 语言切换按钮监听
         document.getElementById("langCn").addEventListener("click", ()=>renderLang("cn"));
         document.getElementById("langEn").addEventListener("click", ()=>renderLang("en"));
 
-        // 弹窗提示封装（自动适配语言）
         function langAlert(key) {
             alert(langText[currentLang][key]);
         }
 
-        // 2.摄像头控制
+        // 摄像头控制
         document.getElementById('openCamera').addEventListener('click', async () => {
             try {
                 stream = await navigator.mediaDevices.getUserMedia({ video: true });
@@ -548,7 +623,7 @@
             }
         });
 
-        // 3.模拟食材识别
+        // 模拟食材识别
         document.getElementById('identifyBtn').addEventListener('click', () => {
             if (!stream) {
                 langAlert("alertCameraOff");
@@ -584,7 +659,6 @@
             alert(langText[currentLang].alertAddOk + inputVal);
         })
 
-        // 渲染食材列表
         function renderIdentifyResult(){
             const t = langText[currentLang];
             const box = document.getElementById('identifyResultBox');
@@ -601,7 +675,6 @@
             });
         }
 
-        // 修改食材名
         window.editFoodName = function(index){
             const val = document.getElementById(`foodInput${index}`).value.trim();
             if(!val){
@@ -611,7 +684,6 @@
             currentFoodList[index] = val;
         }
 
-        // 删除食材
         window.delFood = function(index){
             currentFoodList.splice(index,1);
             renderIdentifyResult();
@@ -672,7 +744,6 @@
             saveHistory(allMenu.map(item=>item.name));
         });
 
-        // 收藏菜品
         window.collectMenu = function(name){
             const t = langText[currentLang];
             const index = collectList.indexOf(name);
@@ -687,7 +758,6 @@
             document.getElementById('generateMenuBtn').click();
         }
 
-        // 弹窗展示菜谱详情
         window.showDetail = function(idx){
             const t = langText[currentLang];
             const steps = JSON.parse(document.getElementById(`menuStep${idx}`).innerText);
@@ -703,12 +773,10 @@
             document.getElementById('detailModal').style.display = 'flex';
         }
 
-        // 关闭弹窗
         document.getElementById('closeModal').addEventListener('click', () => {
             document.getElementById('detailModal').style.display = 'none';
         });
 
-        // 历史记录
         function saveHistory(menuArr){
             const time = new Date().toLocaleString();
             historyList.unshift({ time: time, menus: menuArr });
@@ -735,7 +803,6 @@
             });
         }
 
-        // 清空历史
         document.getElementById('clearHistory').addEventListener('click', () => {
             if(confirm(langText[currentLang].alertClearHistory)){
                 historyList = [];
@@ -744,7 +811,6 @@
             }
         });
 
-        // 随机创意菜品
         document.getElementById('randomFoodBtn').addEventListener('click', () => {
             const t = langText[currentLang];
             const list = randomCreativeMenu[currentLang];
@@ -752,7 +818,6 @@
             document.getElementById('randomFoodRes').innerText = t.randomPrefix + randomRes;
         });
 
-        // 页面初始化
         window.onload = function(){
             renderLang(currentLang);
         }

@@ -170,6 +170,14 @@
         .btn-default:hover {
             background: #dee2e6;
         }
+        .btn-download{
+            background:#3474d9;
+            color:#fff;
+            margin:6px 4px;
+        }
+        .btn-download:hover{
+            background:#275cad;
+        }
 
         /* 识别食材编辑区域 */
         .identify-result {
@@ -310,6 +318,9 @@
             line-height:1.8;
             padding:10px 0;
         }
+        .download-group{
+            margin-top:16px;
+        }
 
         /* 收藏样式 */
         .collected {
@@ -384,7 +395,7 @@
             </div>
         </div>
 
-        <!-- ========== 页面4：数据源与说明 ========== -->
+        <!-- ========== 页面4：数据源与说明（Added database file download section） ========== -->
         <div class="view-page" id="page-about">
             <div class="module-box">
                 <div class="module-title">📊 Data Source Statement</div>
@@ -396,6 +407,18 @@
                     • If there is any copyright issue, please contact the administrator for processing.
                 </div>
             </div>
+
+            <div class="module-box">
+                <div class="module-title">🗄️ Download Database Source Files</div>
+                <div class="text-block">
+                    You can download raw JSON database files below. These files contain all recipe data used by this system.
+                </div>
+                <div class="download-group">
+                    <button class="btn-download" id="downloadRecipeDB">📄 Download recipe_database.json</button>
+                    <button class="btn-download" id="downloadSuggestDB">📄 Download creative_suggestions.json</button>
+                </div>
+            </div>
+
             <div class="module-box">
                 <div class="module-title">ℹ️ About This System</div>
                 <div class="text-block">
@@ -417,6 +440,92 @@
     </div>
 
     <script>
+        // ========== Raw Database Content (For download export) ==========
+        const rawRecipeDatabase = {
+            description:"Core recipe database, bilingual",
+            data:[
+                {"cn":"胡萝卜","en":"Carrot","menus_cn":["胡萝卜炒肉","清炒胡萝卜","胡萝卜炖排骨","胡萝卜鸡蛋饼"],
+                "menus_en":["Stir-fried Carrot with Pork","Plain Stir-fried Carrot","Carrot Pork Rib Stew","Carrot Egg Pancake"],
+                "steps_cn":["1.胡萝卜洗净去皮，切成薄片或细丝备用","2.配菜猪肉切片、鸡蛋打散备用","3.热锅冷油，下入葱姜爆香","4.下入主料翻炒2-3分钟至断生","5.加入适量盐、生抽调味","6.翻炒均匀后即可出锅"],
+                "steps_en":["1. Peel carrot and slice/shred","2. Slice pork and beat eggs as side ingredients","3. Heat oil and saute ginger & green onion","4. Stir-fry carrot for 2-3 mins until half cooked","5. Add salt and light soy sauce","6. Mix well and serve"],
+                "tips_cn":["胡萝卜富含胡萝卜素，热油翻炒更易吸收营养","炒制时间不宜过长，避免软烂流失口感","脾胃虚寒者不宜生吃胡萝卜"],
+                "tips_en":["Carotene absorbs better with oil stir-fry","Do not overcook to keep crisp texture","Raw carrot is not recommended for people with weak stomach"]},
+
+                {"cn":"洋葱","en":"Onion","menus_cn":["洋葱炒肉","洋葱炒蛋","凉拌洋葱","洋葱炒土豆"],
+                "menus_en":["Stir-fried Onion Pork","Onion Scrambled Egg","Cold Mixed Onion","Onion Potato Stir-fry"],
+                "steps_cn":["1.洋葱去皮，切丝泡水去除辛辣味","2.准备配菜，鸡蛋打散或猪肉切片","3.锅中倒油烧热，下入配菜翻炒至断生","4.放入洋葱大火快速翻炒1分钟","5.加盐、少许蚝油调味","6.翻炒均匀即可出锅"],
+                "steps_en":["1. Peel onion, shred and soak in water to reduce spiciness","2. Prepare egg or pork slices","3. Fry side ingredients until half cooked","4. Add onion and stir-fry over high heat for 1 min","5. Season with salt and oyster sauce","6. Mix and serve"],
+                "tips_cn":["洋葱泡水可减少切制流泪、减轻辛辣感","大火快炒能保留洋葱脆嫩口感","肠胃敏感人群不宜过量食用生洋葱"],
+                "tips_en":["Soak onion to avoid tearing eyes and strong taste","High heat stir-fry keeps crisp texture","Raw onion may irritate sensitive stomach"]},
+
+                {"cn":"土豆","en":"Potato","menus_cn":["土豆丝炒肉","酸辣土豆丝","土豆炖鸡块","香煎土豆饼"],
+                "menus_en":["Shredded Potato Pork","Sour Spicy Shredded Potato","Potato Chicken Stew","Pan-fried Potato Pancake"],
+                "steps_cn":["1.土豆去皮切丝/切块，清水浸泡去淀粉","2.控水沥干备用，准备葱姜蒜配料","3.热锅倒油，爆香配料","4.下入土豆翻炒，根据菜品加入配菜","5.加入调味料，适量清水焖煮片刻","6.收汁入味即可出锅"],
+                "steps_en":["1. Peel potato, shred and soak to remove starch","2. Drain water, prepare ginger garlic","3. Heat oil and saute seasonings","4. Fry potato with matching side ingredients","5. Add seasoning and simmer with little water","6. Reduce soup and serve"],
+                "tips_cn":["土豆泡水去淀粉，炒制更清脆不粘连","发芽、变绿的土豆禁止食用","焖煮土豆小火慢炖更软糯入味"],
+                "tips_en":["Soak potato to avoid sticking while frying","Do not eat sprouted/green potatoes","Low heat simmer makes potato soft"]},
+
+                {"cn":"青菜","en":"Green Vegetable","menus_cn":["清炒青菜","青菜炒香菇","青菜豆腐汤","蒜蓉青菜"],
+                "menus_en":["Plain Stir-fried Greens","Greens with Mushroom","Greens Tofu Soup","Garlic Stir-fried Greens"],
+                "steps_cn":["1.青菜摘洗干净，沥干水分","2.大蒜切末备用","3.锅中烧水，少许盐油焯烫青菜（可选）","4.热锅热油，爆香蒜末","5.下入青菜大火快速翻炒","6.加盐调味，翻炒均匀出锅"],
+                "steps_en":["1. Clean greens and drain water","2. Chop garlic","3. Blanch greens with salt oil (optional)","4. Heat oil and fry garlic","5. Stir-fry greens over high heat","6. Salt and serve"],
+                "tips_cn":["绿叶菜大火快炒，保留维生素不流失","焯水可去除青菜青涩味","脾胃虚寒者少吃生冷青菜"],
+                "tips_en":["High heat fast fry retains vitamins","Blanch removes bitter taste","Cold greens not good for weak stomach"]},
+
+                {"cn":"青椒","en":"Green Pepper","menus_cn":["青椒炒肉","青椒炒蛋","青椒土豆丝","凉拌青椒"],
+                "menus_en":["Pepper Pork Stir-fry","Pepper Scrambled Egg","Pepper Shredded Potato","Cold Mixed Pepper"],
+                "steps_cn":["1.青椒去蒂去籽，洗净切丝","2.准备鸡蛋、猪肉等配菜","3.热锅倒油，下入配菜炒至半熟","4.加入青椒大火翻炒","5.加入盐、少许鸡精调味","6.翻炒均匀即可装盘"],
+                "steps_en":["1. Remove stem & seeds, shred pepper","2. Prepare egg or pork","3. Fry side ingredients half done","4. Add pepper and high heat fry","5. Season with salt & chicken powder","6. Mix and plate"],
+                "tips_cn":["青椒籽辛辣味重，建议彻底去除","不喜辣可选择薄皮青椒","炒制时间短，保留脆嫩口感"],
+                "tips_en":["Seeds bring heavy spiciness, remove fully","Thin pepper has mild taste","Short fry to keep crisp"]},
+
+                {"cn":"白菜","en":"Chinese Cabbage","menus_cn":["白菜炒粉条","白菜炖豆腐","清炒白菜","白菜肉丝汤"],
+                "menus_en":["Cabbage Vermicelli Stir-fry","Cabbage Tofu Stew","Plain Fried Cabbage","Cabbage Pork Soup"],
+                "steps_cn":["1.白菜拆分菜叶菜帮，洗净切块","2.粉条泡软、豆腐切块备用","3.热锅倒油爆香葱姜","4.先炒菜帮再炒菜叶","5.加入配菜和调味料，少许清水焖煮","6.入味后收汁出锅"],
+                "steps_en":["1. Separate cabbage leaf & stem, cut chunks","2. Soak vermicelli, cut tofu","3. Fry ginger green onion in hot oil","4. Fry thick stem first then tender leaf","5. Add ingredients and simmer lightly","6. Reduce soup and serve"],
+                "tips_cn":["菜帮较硬优先炒制，菜叶易熟最后放","白菜含水量高，炒制无需多加清水","隔夜熟白菜尽量少吃"],
+                "tips_en":["Cook thick stem first, leaf last","Cabbage has lots of water, no extra water needed","Avoid leftover cooked cabbage overnight"]}
+            ]
+        };
+
+        const rawSuggestDatabase = {
+            description:"Random creative leftover recipe suggestions",
+            cn:[
+                "胡萝卜洋葱双拼小炒，鲜香解腻超下饭",
+                "土豆青菜什锦杂炒，低脂健康清肠胃",
+                "青椒白菜鲜蔬烩，简单快手家常菜",
+                "洋葱土豆焖素菜，软糯入味老少皆宜",
+                "胡萝卜青菜蛋炒，营养均衡儿童爱吃"
+            ],
+            en:[
+                "Carrot & Onion Mix Stir-fry, tasty and appetizing",
+                "Potato Green Veggie Mix, low fat healthy meal",
+                "Pepper Cabbage Vegetable Stew, quick easy home dish",
+                "Onion Potato Braised Veggies, soft & tasty for all ages",
+                "Carrot Green Veggie Egg Stir-fry, balanced nutrition for kids"
+            ]
+        };
+
+        // Download function to generate JSON file and trigger browser download
+        function downloadJSON(data, filename){
+            const blob = new Blob([JSON.stringify(data,null,2)], {type:"application/json"});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        document.getElementById("downloadRecipeDB").onclick = ()=>{
+            downloadJSON(rawRecipeDatabase, "recipe_database.json");
+        }
+        document.getElementById("downloadSuggestDB").onclick = ()=>{
+            downloadJSON(rawSuggestDatabase, "creative_suggestions.json");
+        }
+
         // ========== 多语言文本库 ==========
         const langText = {
             cn: {
@@ -511,16 +620,6 @@
             }
         };
 
-        // 双语食材&菜谱库
-        const foodMenuLib = {
-            "胡萝卜": { enName: "Carrot", menus: {cn:["胡萝卜炒肉","清炒胡萝卜","胡萝卜炖排骨","胡萝卜鸡蛋饼"],en:["Stir-fried Carrot with Pork","Plain Stir-fried Carrot","Carrot Pork Rib Stew","Carrot Egg Pancake"]}, steps: {cn:["1.胡萝卜洗净去皮，切成薄片或细丝备用","2.配菜猪肉切片、鸡蛋打散备用","3.热锅冷油，下入葱姜爆香","4.下入主料翻炒2-3分钟至断生","5.加入适量盐、生抽调味","6.翻炒均匀后即可出锅"],en:["1. Peel carrot and slice/shred","2. Slice pork and beat eggs as side ingredients","3. Heat oil and saute ginger & green onion","4. Stir-fry carrot for 2-3 mins until half cooked","5. Add salt and light soy sauce","6. Mix well and serve"]}, tips: {cn:["胡萝卜富含胡萝卜素，热油翻炒更易吸收营养","炒制时间不宜过长，避免软烂流失口感","脾胃虚寒者不宜生吃胡萝卜"],en:["Carotene absorbs better with oil stir-fry","Do not overcook to keep crisp texture","Raw carrot is not recommended for people with weak stomach"]} },
-            "洋葱": { enName: "Onion", menus: {cn:["洋葱炒肉","洋葱炒蛋","凉拌洋葱","洋葱炒土豆"],en:["Stir-fried Onion Pork","Onion Scrambled Egg","Cold Mixed Onion","Onion Potato Stir-fry"]}, steps: {cn:["1.洋葱去皮，切丝泡水去除辛辣味","2.准备配菜，鸡蛋打散或猪肉切片","3.锅中倒油烧热，下入配菜翻炒至断生","4.放入洋葱大火快速翻炒1分钟","5.加盐、少许蚝油调味","6.翻炒均匀即可出锅"],en:["1. Peel onion, shred and soak in water to reduce spiciness","2. Prepare egg or pork slices","3. Fry side ingredients until half cooked","4. Add onion and stir-fry over high heat for 1 min","5. Season with salt and oyster sauce","6. Mix and serve"]}, tips: {cn:["洋葱泡水可减少切制流泪、减轻辛辣感","大火快炒能保留洋葱脆嫩口感","肠胃敏感人群不宜过量食用生洋葱"],en:["Soak onion to avoid tearing eyes and strong taste","High heat stir-fry keeps crisp texture","Raw onion may irritate sensitive stomach"]} },
-            "土豆": { enName: "Potato", menus: {cn:["土豆丝炒肉","酸辣土豆丝","土豆炖鸡块","香煎土豆饼"],en:["Shredded Potato Pork","Sour Spicy Shredded Potato","Potato Chicken Stew","Pan-fried Potato Pancake"]}, steps: {cn:["1.土豆去皮切丝/切块，清水浸泡去淀粉","2.控水沥干备用，准备葱姜蒜配料","3.热锅倒油，爆香配料","4.下入土豆翻炒，根据菜品加入配菜","5.加入调味料，适量清水焖煮片刻","6.收汁入味即可出锅"],en:["1. Peel potato, shred and soak to remove starch","2. Drain water, prepare ginger garlic","3. Heat oil and saute seasonings","4. Fry potato with matching side ingredients","5. Add seasoning and simmer with little water","6. Reduce soup and serve"]}, tips: {cn:["土豆泡水去淀粉，炒制更清脆不粘连","发芽、变绿的土豆禁止食用","焖煮土豆小火慢炖更软糯入味"],en:["Soak potato to avoid sticking while frying","Do not eat sprouted/green potatoes","Low heat simmer makes potato soft"]} },
-            "青菜": { enName: "Green Vegetable", menus: {cn:["清炒青菜","青菜炒香菇","青菜豆腐汤","蒜蓉青菜"],en:["Plain Stir-fried Greens","Greens with Mushroom","Greens Tofu Soup","Garlic Stir-fried Greens"]}, steps: {cn:["1.青菜摘洗干净，沥干水分","2.大蒜切末备用","3.锅中烧水，少许盐油焯烫青菜（可选）","4.热锅热油，爆香蒜末","5.下入青菜大火快速翻炒","6.加盐调味，翻炒均匀出锅"],en:["1. Clean greens and drain water","2. Chop garlic","3. Blanch greens with salt oil (optional)","4. Heat oil and fry garlic","5. Stir-fry greens over high heat","6. Salt and serve"]}, tips: {cn:["绿叶菜大火快炒，保留维生素不流失","焯水可去除青菜青涩味","脾胃虚寒者少吃生冷青菜"],en:["High heat fast fry retains vitamins","Blanch removes bitter taste","Cold greens not good for weak stomach"]} },
-            "青椒": { enName: "Green Pepper", menus: {cn:["青椒炒肉","青椒炒蛋","青椒土豆丝","凉拌青椒"],en:["Pepper Pork Stir-fry","Pepper Scrambled Egg","Pepper Shredded Potato","Cold Mixed Pepper"]}, steps: {cn:["1.青椒去蒂去籽，洗净切丝","2.准备鸡蛋、猪肉等配菜","3.热锅倒油，下入配菜炒至半熟","4.加入青椒大火翻炒","5.加入盐、少许鸡精调味","6.翻炒均匀即可装盘"],en:["1. Remove stem & seeds, shred pepper","2. Prepare egg or pork","3. Fry side ingredients half done","4. Add pepper and high heat fry","5. Season with salt & chicken powder","6. Mix and plate"]}, tips: {cn:["青椒籽辛辣味重，建议彻底去除","不喜辣可选择薄皮青椒","炒制时间短，保留脆嫩口感"],en:["Seeds bring heavy spiciness, remove fully","Thin pepper has mild taste","Short fry to keep crisp"]} },
-            "白菜": { enName: "Chinese Cabbage", menus: {cn:["白菜炒粉条","白菜炖豆腐","清炒白菜","白菜肉丝汤"],en:["Cabbage Vermicelli Stir-fry","Cabbage Tofu Stew","Plain Fried Cabbage","Cabbage Pork Soup"]}, steps: {cn:["1.白菜拆分菜叶菜帮，洗净切块","2.粉条泡软、豆腐切块备用","3.热锅倒油爆香葱姜","4.先炒菜帮再炒菜叶","5.加入配菜和调味料，少许清水焖煮","6.入味后收汁出锅"],en:["1. Separate cabbage leaf & stem, cut chunks","2. Soak vermicelli, cut tofu","3. Fry ginger green onion in hot oil","4. Fry thick stem first then tender leaf","5. Add ingredients and simmer lightly","6. Reduce soup and serve"]}, tips: {cn:["菜帮较硬优先炒制，菜叶易熟最后放","白菜含水量高，炒制无需多加清水","隔夜熟白菜尽量少吃"],en:["Cook thick stem first, leaf last","Cabbage has lots of water, no extra water needed","Avoid leftover cooked cabbage overnight"]} }
-        };
-
         // 随机创意双语推荐
         const randomCreativeMenu = {
             cn: [
@@ -538,6 +637,17 @@
                 "Carrot Green Veggie Egg Stir-fry, balanced nutrition for kids"
             ]
         };
+
+        // 双语食材&菜谱库
+        const foodMenuLib = rawRecipeDatabase.data.reduce((obj,item)=>{
+            obj[item.cn] = {
+                enName: item.en,
+                menus:{cn:item.menus_cn, en:item.menus_en},
+                steps:{cn:item.steps_cn, en:item.steps_en},
+                tips:{cn:item.tips_cn, en:item.tips_en}
+            }
+            return obj;
+        },{});
 
         // 全局变量
         let video = document.getElementById('video');

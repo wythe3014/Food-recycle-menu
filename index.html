@@ -266,11 +266,11 @@
 
         .modal-content {
             width: 90%;
-            max-width: 600px;
+            max-width: 640px;
             background: #fff;
             border-radius: 12px;
             padding: 25px;
-            max-height: 80vh;
+            max-height: 85vh;
             overflow-y: auto;
         }
 
@@ -292,7 +292,7 @@
         .step-item {
             padding: 10px 0;
             border-bottom: 1px solid #f5f5f5;
-            line-height: 1.6;
+            line-height: 1.7;
         }
 
         /* 历史记录 */
@@ -405,7 +405,7 @@
             </div>
         </div>
 
-        <!-- ========== 页面4：数据源与说明（Added hyperlinks for literature & dataset websites） ========== -->
+        <!-- ========== 页面4：数据源与说明 ========== -->
         <div class="view-page" id="page-about">
             <div class="module-box">
                 <div class="module-title">📊 Data Source Statement</div>
@@ -448,7 +448,7 @@
                 <div class="text-block">
                     This system is designed for food leftover recycling management.
                     Users can input ingredients via camera recognition or manual typing, then automatically get available home cooking menus.
-                    Each recipe contains cooking procedures and precautions, supporting favorite collection and history lookup.
+                    Each recipe contains detailed cooking procedures and precautions, supporting favorite collection and history lookup.
                 </div>
             </div>
         </div>
@@ -464,51 +464,130 @@
     </div>
 
     <script>
-        // ========== Raw Database Content (For download export) ==========
+        // ========== Raw Database Content (Extended detailed cooking steps) ==========
         const rawRecipeDatabase = {
-            description:"Core recipe database, bilingual",
+            description:"Core recipe database with full detailed bilingual cooking workflow",
             data:[
-                {"cn":"胡萝卜","en":"Carrot","menus_cn":["胡萝卜炒肉","清炒胡萝卜","胡萝卜炖排骨","胡萝卜鸡蛋饼"],
-                "menus_en":["Stir-fried Carrot with Pork","Plain Stir-fried Carrot","Carrot Pork Rib Stew","Carrot Egg Pancake"],
-                "steps_cn":["1.胡萝卜洗净去皮，切成薄片或细丝备用","2.配菜猪肉切片、鸡蛋打散备用","3.热锅冷油，下入葱姜爆香","4.下入主料翻炒2-3分钟至断生","5.加入适量盐、生抽调味","6.翻炒均匀后即可出锅"],
-                "steps_en":["1. Peel carrot and slice/shred","2. Slice pork and beat eggs as side ingredients","3. Heat oil and saute ginger & green onion","4. Stir-fry carrot for 2-3 mins until half cooked","5. Add salt and light soy sauce","6. Mix well and serve"],
-                "tips_cn":["胡萝卜富含胡萝卜素，热油翻炒更易吸收营养","炒制时间不宜过长，避免软烂流失口感","脾胃虚寒者不宜生吃胡萝卜"],
-                "tips_en":["Carotene absorbs better with oil stir-fry","Do not overcook to keep crisp texture","Raw carrot is not recommended for people with weak stomach"]},
-
-                {"cn":"洋葱","en":"Onion","menus_cn":["洋葱炒肉","洋葱炒蛋","凉拌洋葱","洋葱炒土豆"],
-                "menus_en":["Stir-fried Onion Pork","Onion Scrambled Egg","Cold Mixed Onion","Onion Potato Stir-fry"],
-                "steps_cn":["1.洋葱去皮，切丝泡水去除辛辣味","2.准备配菜，鸡蛋打散或猪肉切片","3.锅中倒油烧热，下入配菜翻炒至断生","4.放入洋葱大火快速翻炒1分钟","5.加盐、少许蚝油调味","6.翻炒均匀即可出锅"],
-                "steps_en":["1. Peel onion, shred and soak in water to reduce spiciness","2. Prepare egg or pork slices","3. Fry side ingredients until half cooked","4. Add onion and stir-fry over high heat for 1 min","5. Season with salt and oyster sauce","6. Mix and serve"],
-                "tips_cn":["洋葱泡水可减少切制流泪、减轻辛辣感","大火快炒能保留洋葱脆嫩口感","肠胃敏感人群不宜过量食用生洋葱"],
-                "tips_en":["Soak onion to avoid tearing eyes and strong taste","High heat stir-fry keeps crisp texture","Raw onion may irritate sensitive stomach"]},
-
-                {"cn":"土豆","en":"Potato","menus_cn":["土豆丝炒肉","酸辣土豆丝","土豆炖鸡块","香煎土豆饼"],
-                "menus_en":["Shredded Potato Pork","Sour Spicy Shredded Potato","Potato Chicken Stew","Pan-fried Potato Pancake"],
-                "steps_cn":["1.土豆去皮切丝/切块，清水浸泡去淀粉","2.控水沥干备用，准备葱姜蒜配料","3.热锅倒油，爆香配料","4.下入土豆翻炒，根据菜品加入配菜","5.加入调味料，适量清水焖煮片刻","6.收汁入味即可出锅"],
-                "steps_en":["1. Peel potato, shred and soak to remove starch","2. Drain water, prepare ginger garlic","3. Heat oil and saute seasonings","4. Fry potato with matching side ingredients","5. Add seasoning and simmer with little water","6. Reduce soup and serve"],
-                "tips_cn":["土豆泡水去淀粉，炒制更清脆不粘连","发芽、变绿的土豆禁止食用","焖煮土豆小火慢炖更软糯入味"],
-                "tips_en":["Soak potato to avoid sticking while frying","Do not eat sprouted/green potatoes","Low heat simmer makes potato soft"]},
-
-                {"cn":"青菜","en":"Green Vegetable","menus_cn":["清炒青菜","青菜炒香菇","青菜豆腐汤","蒜蓉青菜"],
-                "menus_en":["Plain Stir-fried Greens","Greens with Mushroom","Greens Tofu Soup","Garlic Stir-fried Greens"],
-                "steps_cn":["1.青菜摘洗干净，沥干水分","2.大蒜切末备用","3.锅中烧水，少许盐油焯烫青菜（可选）","4.热锅热油，爆香蒜末","5.下入青菜大火快速翻炒","6.加盐调味，翻炒均匀出锅"],
-                "steps_en":["1. Clean greens and drain water","2. Chop garlic","3. Blanch greens with salt oil (optional)","4. Heat oil and fry garlic","5. Stir-fry greens over high heat","6. Salt and serve"],
-                "tips_cn":["绿叶菜大火快炒，保留维生素不流失","焯水可去除青菜青涩味","脾胃虚寒者少吃生冷青菜"],
-                "tips_en":["High heat fast fry retains vitamins","Blanch removes bitter taste","Cold greens not good for weak stomach"]},
-
-                {"cn":"青椒","en":"Green Pepper","menus_cn":["青椒炒肉","青椒炒蛋","青椒土豆丝","凉拌青椒"],
-                "menus_en":["Pepper Pork Stir-fry","Pepper Scrambled Egg","Pepper Shredded Potato","Cold Mixed Pepper"],
-                "steps_cn":["1.青椒去蒂去籽，洗净切丝","2.准备鸡蛋、猪肉等配菜","3.热锅倒油，下入配菜炒至半熟","4.加入青椒大火翻炒","5.加入盐、少许鸡精调味","6.翻炒均匀即可装盘"],
-                "steps_en":["1. Remove stem & seeds, shred pepper","2. Prepare egg or pork","3. Fry side ingredients half done","4. Add pepper and high heat fry","5. Season with salt & chicken powder","6. Mix and plate"],
-                "tips_cn":["青椒籽辛辣味重，建议彻底去除","不喜辣可选择薄皮青椒","炒制时间短，保留脆嫩口感"],
-                "tips_en":["Seeds bring heavy spiciness, remove fully","Thin pepper has mild taste","Short fry to keep crisp"]},
-
-                {"cn":"白菜","en":"Chinese Cabbage","menus_cn":["白菜炒粉条","白菜炖豆腐","清炒白菜","白菜肉丝汤"],
-                "menus_en":["Cabbage Vermicelli Stir-fry","Cabbage Tofu Stew","Plain Fried Cabbage","Cabbage Pork Soup"],
-                "steps_cn":["1.白菜拆分菜叶菜帮，洗净切块","2.粉条泡软、豆腐切块备用","3.热锅倒油爆香葱姜","4.先炒菜帮再炒菜叶","5.加入配菜和调味料，少许清水焖煮","6.入味后收汁出锅"],
-                "steps_en":["1. Separate cabbage leaf & stem, cut chunks","2. Soak vermicelli, cut tofu","3. Fry ginger green onion in hot oil","4. Fry thick stem first then tender leaf","5. Add ingredients and simmer lightly","6. Reduce soup and serve"],
-                "tips_cn":["菜帮较硬优先炒制，菜叶易熟最后放","白菜含水量高，炒制无需多加清水","隔夜熟白菜尽量少吃"],
-                "tips_en":["Cook thick stem first, leaf last","Cabbage has lots of water, no extra water needed","Avoid leftover cooked cabbage overnight"]}
+                {
+                    "cn":"胡萝卜","en":"Carrot",
+                    "menus_cn":["胡萝卜炒肉","清炒胡萝卜","胡萝卜炖排骨","胡萝卜鸡蛋饼"],
+                    "menus_en":["Stir-fried Carrot with Pork","Plain Stir-fried Carrot","Carrot Pork Rib Stew","Carrot Egg Pancake"],
+                    "steps_cn":[
+                        "1.胡萝卜洗净，削去外皮，斜刀切成薄片后改刀切丝；猪肉逆纹理切成薄片，加入少许生抽、淀粉抓匀腌制10分钟。",
+                        "2.热锅倒入食用油，中小火下入姜片、葱段爆香，捞出葱姜残渣。",
+                        "3.转大火放入肉片快速滑炒，炒至肉片变色微微卷起后盛出备用。",
+                        "4.锅中底油继续加热，倒入胡萝卜丝持续翻炒3至4分钟，炒至胡萝卜变软透出甜味。",
+                        "5.将肉片倒回锅中，加入适量盐、少量生抽调味，充分混合翻炒均匀。",
+                        "6.关火，盛盘即可上桌。"
+                    ],
+                    "steps_en":[
+                        "1. Wash carrots and peel outer skin. Slice diagonally then shred. Slice pork against grain, marinate with light soy sauce and starch for 10 minutes.",
+                        "2. Heat oil over medium-low heat, saute ginger and green onion, then remove scraps.",
+                        "3. Turn to high heat, stir-fry pork slices quickly until colour changes, take out and set aside.",
+                        "4. Keep residual oil hot, add shredded carrot and stir continuously for 3–4 minutes until softened and sweet flavour releases.",
+                        "5. Put pork back into pan, add salt and a small amount of light soy sauce, stir evenly.",
+                        "6. Turn off heat and serve on plate."
+                    ],
+                    "tips_cn":["胡萝卜富含β-胡萝卜素，搭配油脂炒制更利于人体吸收；不要长时间高温炖煮，避免营养流失；肠胃虚弱人群不宜生吃胡萝卜。"],
+                    "tips_en":["Carrot contains beta-carotene which absorbs better when cooked with oil. Avoid prolonged high-temperature boiling. Raw carrot is not suitable for people with weak digestion."]
+                },
+                {
+                    "cn":"洋葱","en":"Onion",
+                    "menus_cn":["洋葱炒肉","洋葱炒蛋","凉拌洋葱","洋葱炒土豆"],
+                    "menus_en":["Stir-fried Onion Pork","Onion Scrambled Egg","Cold Mixed Onion","Onion Potato Stir-fry"],
+                    "steps_cn":[
+                        "1.洋葱去除外皮，对半切开，顺着纹理切成粗丝，放入清水中浸泡5分钟减轻辛辣刺激；猪肉切片腌制备用。",
+                        "2.热锅放油，中小火把肉片滑炒至断生，取出备用。",
+                        "3.利用锅中剩余油脂，开大火倒入洋葱丝快速翻炒1分钟，保持洋葱脆嫩口感。",
+                        "4.肉片重新入锅，加入少许盐与蚝油，翻炒均匀。",
+                        "5.确认整体入味后立即关火，防止洋葱出水变软失去口感。"
+                    ],
+                    "steps_en":[
+                        "1. Peel onion, cut into thick strips, soak in clean water for 5 minutes to reduce pungency. Slice and marinate pork.",
+                        "2. Heat oil, stir-fry pork over medium heat until half cooked and set aside.",
+                        "3. Use remaining oil, high heat stir onion strips for 1 minute to keep crisp texture.",
+                        "4. Return pork to pan, add salt and oyster sauce, stir thoroughly.",
+                        "5. Turn off heat promptly once seasoned to prevent onion releasing excess water."
+                    ],
+                    "tips_cn":["浸泡洋葱可以减少切的时候流泪；大火快炒锁住甜味；胃炎敏感人群少吃生洋葱。"],
+                    "tips_en":["Soaking onion prevents eye irritation while cutting. High heat fast fry preserves sweetness. Raw onion may irritate sensitive stomach."]
+                },
+                {
+                    "cn":"土豆","en":"Potato",
+                    "menus_cn":["土豆丝炒肉","酸辣土豆丝","土豆炖鸡块","香煎土豆饼"],
+                    "menus_en":["Shredded Potato Pork","Sour Spicy Shredded Potato","Potato Chicken Stew","Pan-fried Potato Pancake"],
+                    "steps_cn":[
+                        "1.土豆去皮切细丝，立即放入冷水反复淘洗，洗去表面淀粉，捞出沥干水分。",
+                        "2.锅中热油，先炒香肉丝，变色之后盛出。",
+                        "3.大火烧热底油，下入土豆丝持续快速翻炒2至3分钟。",
+                        "4.肉丝放回锅内，加入盐等调味，翻炒均匀即可出锅。"
+                    ],
+                    "steps_en":[
+                        "1. Peel potato and shred. Rinse repeatedly under cold water to wash off surface starch and drain well.",
+                        "2. Heat oil, stir-fry shredded meat until cooked and remove.",
+                        "3. Heat residual oil on high heat, stir shredded potato rapidly for 2–3 minutes.",
+                        "4. Put meat back, season with salt, mix well and serve."
+                    ],
+                    "tips_cn":["冲洗淀粉可以避免炒制粘连；发芽、表皮变绿的土豆含有毒素，严禁食用；小火慢炖土豆口感更加绵密。"],
+                    "tips_en":["Rinsing starch prevents sticking during frying. Never consume sprouted or green-skinned potatoes. Slow simmer makes potato soft and creamy."]
+                },
+                {
+                    "cn":"青菜","en":"Green Vegetable",
+                    "menus_cn":["清炒青菜","青菜炒香菇","青菜豆腐汤","蒜蓉青菜"],
+                    "menus_en":["Plain Stir-fried Greens","Greens with Mushroom","Greens Tofu Soup","Garlic Stir-fried Greens"],
+                    "steps_cn":[
+                        "1.青菜摘除黄叶，逐根清洗泥沙，沥干表面水分；大蒜去皮切成蒜末。",
+                        "2.大火充分烧热炒锅，倒入食用油，下入蒜末小火煸炒出蒜香。",
+                        "3.立刻放入全部青菜，保持最大火力不断翻动。",
+                        "4.菜叶变软之后撒入食盐，快速翻匀，全程控制在2分钟以内出锅。"
+                    ],
+                    "steps_en":[
+                        "1. Remove yellow leaves from greens, wash thoroughly and drain. Peel garlic and mince.",
+                        "2. Heat wok fully on high heat, pour oil, saute minced garlic over low heat until fragrant.",
+                        "3. Add all greens immediately, keep high heat and stir continuously.",
+                        "4. Add salt once leaves soften, mix quickly and serve within 2 minutes total cooking time."
+                    ],
+                    "tips_cn":["绿叶蔬菜适合大火快炒，缩短加热时间减少维生素流失；不要长时间焖煮，菜叶容易发黄发苦。"],
+                    "tips_en":["Leafy vegetables require high heat fast stir-fry to retain vitamins. Long steaming will make leaves turn yellow and bitter."]
+                },
+                {
+                    "cn":"青椒","en":"Green Pepper",
+                    "menus_cn":["青椒炒肉","青椒炒蛋","青椒土豆丝","凉拌青椒"],
+                    "menus_en":["Pepper Pork Stir-fry","Pepper Scrambled Egg","Pepper Shredded Potato","Cold Mixed Pepper"],
+                    "steps_cn":[
+                        "1.青椒切掉蒂部，对半剖开，去除内部辣椒籽，切成粗丝；肉类切片腌制。",
+                        "2.热锅滑炒肉片至熟，盛出备用。",
+                        "3.底油加热，倒入青椒丝大火翻炒1分半钟，保留微微脆感。",
+                        "4.肉片回锅，加盐调味混合均匀即可装盘。"
+                    ],
+                    "steps_en":[
+                        "1. Cut off pepper stem, split open, remove seeds and cut into thick strips. Slice and marinate meat.",
+                        "2. Stir-fry meat slices in hot oil until cooked, set aside.",
+                        "3. Heat residual oil, stir pepper strips on high heat for 90 seconds to keep slight crunch.",
+                        "4. Return meat to pan, season with salt, combine and plate."
+                    ],
+                    "tips_cn":["辣椒籽带有强烈辣味，不吃辣务必清理干净；炒制时间不宜过长，防止软塌失去口感。"],
+                    "tips_en":["Seeds carry strong spiciness, remove fully for mild taste. Do not overcook otherwise pepper will turn limp."]
+                },
+                {
+                    "cn":"白菜","en":"Chinese Cabbage",
+                    "menus_cn":["白菜炒粉条","白菜炖豆腐","清炒白菜","白菜肉丝汤"],
+                    "menus_en":["Cabbage Vermicelli Stir-fry","Cabbage Tofu Stew","Plain Fried Cabbage","Cabbage Pork Soup"],
+                    "steps_cn":[
+                        "1.白菜分开菜帮与菜叶，菜帮斜刀切片，菜叶手撕成片，分开存放。",
+                        "2.热锅放油，葱姜爆香，先放入厚实菜帮翻炒2分钟。",
+                        "3.再放入柔软菜叶继续翻炒至微微变软。",
+                        "4.加入少量清水焖一分钟调味，完成后出锅。"
+                    ],
+                    "steps_en":[
+                        "1. Separate thick cabbage stems and tender leaves. Slice stems diagonally, tear leaves by hand and store separately.",
+                        "2. Heat oil, saute ginger and green onion. First stir thick stems for 2 minutes.",
+                        "3. Add tender leaves and continue stirring until slightly softened.",
+                        "4. Add a small amount of water, simmer 1 minute, season and serve."
+                    ],
+                    "tips_cn":["菜帮质地更硬，需要优先炒制；白菜含水量充足，烹饪无需大量加水；不建议长期存放煮熟的白菜。"],
+                    "tips_en":["Thick stems need longer cooking time, cook first. Cabbage contains abundant natural moisture, extra water is not required. Avoid storing cooked cabbage overnight."]
+                }
             ]
         };
 
@@ -584,7 +663,7 @@
                 historyFood: "生成菜品：",
                 modalTitle: "菜品详情",
                 stepTitle: "📝 制作步骤",
-                tipTitle: "⚠️ 注意事项",
+                tipTitle: "⚠️ 烹饪注意事项",
                 alertCameraOff: "请先开启摄像头！",
                 alertIdentifyOk: "食材识别完成！可手动编辑修改菜名",
                 alertEmptyInput: "请输入食材名称！",
@@ -629,7 +708,7 @@
                 historyFood: "Dishes: ",
                 modalTitle: "Dish Recipe Details",
                 stepTitle: "📝 Cooking Steps",
-                tipTitle: "⚠️ Cooking Tips",
+                tipTitle: "⚠️ Cooking Notes",
                 alertCameraOff: "Please open camera first!",
                 alertIdentifyOk: "Scan finished! You can edit ingredient names manually",
                 alertEmptyInput: "Please enter ingredient name!",

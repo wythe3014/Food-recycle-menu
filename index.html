@@ -321,6 +321,16 @@
         .download-group{
             margin-top:16px;
         }
+        .link-item{
+            margin:8px 0;
+        }
+        .link-item a{
+            color:#2563eb;
+            text-decoration:none;
+        }
+        .link-item a:hover{
+            text-decoration:underline;
+        }
 
         /* 收藏样式 */
         .collected {
@@ -395,7 +405,7 @@
             </div>
         </div>
 
-        <!-- ========== 页面4：数据源与说明（Added database file download section） ========== -->
+        <!-- ========== 页面4：数据源与说明（Added hyperlinks for literature & dataset websites） ========== -->
         <div class="view-page" id="page-about">
             <div class="module-box">
                 <div class="module-title">📊 Data Source Statement</div>
@@ -406,6 +416,20 @@
                     • All data is used for non-commercial demonstration only.<br>
                     • If there is any copyright issue, please contact the administrator for processing.
                 </div>
+            </div>
+
+            <div class="module-box">
+                <div class="module-title">🔗 Reference Dataset & Literature Links</div>
+                <div class="text-block">
+                    The following open-access datasets and research resources support the construction of this recipe matching system:
+                    <div class="link-item">• <a target="_blank" href="https://www.kaggle.com/datasets">Kaggle Open Food & Recipe Datasets</a></div>
+                    <div class="link-item">• <a target="_blank" href="https://arxiv.org/">arXiv Food Computing Research Papers</a></div>
+                    <div class="link-item">• <a target="_blank" href="https://data.world/">Data.World Public Culinary Datasets</a></div>
+                    <div class="link-item">• <a target="_blank" href="https://www.ubereats.com/research">Uber Eats Open Food Consumption Research</a></div>
+                </div>
+                <p style="margin-top:10px;font-size:14px;color:#555;">
+                    All links open in new tabs for reference verification.
+                </p>
             </div>
 
             <div class="module-box">
